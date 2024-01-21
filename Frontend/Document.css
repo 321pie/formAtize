@@ -1,0 +1,95 @@
+body{
+    margin: 0;
+    padding: 0;
+    background-color: teal;
+}
+
+div#HomeMenu{
+    text-align: center;
+    color: white;
+    background-color: teal;
+    min-height: 2%;
+    max-height: 2%;
+    font-size: 2em;
+    overflow: hidden;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+ul{
+    list-style: none;
+    display: flex;
+    margin: 0;
+    border: 3px;
+    border-color: white;
+    padding: 0;
+}
+
+li{
+    min-width: 10%;
+    min-height: 100%;
+    float: left;
+    margin: 0;
+}
+
+li button{
+    background-color: teal;
+    color: white;
+    border-color: white;
+    min-width: 100%;
+    min-height: 100%;
+}
+
+li button:hover{
+    cursor: grab;
+    color: aquamarine;
+    border-color: aquamarine;
+}
+
+li#DocName{
+    min-width: 80%;
+    min-height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    float: left;
+}
+
+div#Pages{
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: absolute;
+    background-color: white;
+    top: 10%;
+    bottom: 10%;
+    min-width: 100%;
+}
+
+textarea{
+    min-height: max-content;
+    max-height: 130vw;
+    min-width: 100%;
+    resize: none;
+    border-color: white;
+    background-color: teal;
+    color: white;
+    padding: 0;
+    border-top: 1px;
+    border-right: 0;
+    border-bottom: 1px;
+    border-left: 0;
+}
+
+textarea:focus{
+    border-color: aquamarine;
+}
+
+div#BlockMenu{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+div#BlockMenu li{
+    min-width: 33%;
+    min-height: max-content;
+    float: left;
+}

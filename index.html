@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>formAtize</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>Drive API Demo</p>
+
+    <!--Add buttons to initiate auth sequence and sign out-->
+    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+
+    <div id="popup_window">
+      <h1>Please enter document title</h1>
+      <textarea name="document-title" id="document_title" cols="45" rows="1"></textarea>
+      <h1>Please enter document text</h1>
+      <textarea name="document-text" id="document_text" cols="45" rows="10"></textarea>
+      <button id="create_button" onclick="handleCreateClick()">Create</button>
+    </div>
+
+    <div id="document_load">
+      <h1>Please enter document id</h1>
+      <textarea id="document_id" cols="45" rows="1"></textarea>
+      <button id="create_button" onclick="handleLoadClick()">Load</button>
+      <br></br>
+      <textarea id="document_body" cols="45" rows="10"></textarea>
+      <br></br>
+      <button id="refresh_button" onclick="listFiles()">Refresh Files</button>
+    </div>
+
+    <pre id="content" style="white-space: pre-wrap;"></pre>
+
+    <script type="text/javascript">
+      const CLIENT_ID = '576519804905-crn5en1klti0nue1qq146fuj4keo9vvs.apps.googleusercontent.com';
+      const API_KEY = 'AIzaSyB_cVGez_ASJg33xq7fqO35_tRf-NiXC1M';
+
+      async function makeNewFolder(name) {
+        return -1;
+        /*//alert('In func');
+        var body = {
+          'name': name,
+          'mimeType': 'application/vnd.google-apps.folder',
+        };
+
+        //alert('After body');
+        var request = gapi.client.drive.files.insert({
+          'resource': body,
+        });
+        //alert('After request');
+
+        request.execute(function(resp) {
+          //alert('Folder ID: ' + resp.id);
+        });
+        /*let fileMetadata = {
+          'name': name,
+        };
+
+        let media = {
+          'mimeType': 'application/vnd.google-apps.folder',
+        };
+
+        alert('In func');
+        let returnVar = gapi.client.drive.files.create({
+          'resource': fileMetadata,
+          'media': media,
+          'fields': 'id',
+        });
+
+        /*, function(err, file) {
+          if (err) {
+            // Handle error
+            alert('Failed to create folder.');
+            return -1;
+          } else {
+            alert('Created folder successfully');
+            return file.id;
+          }
+        }*/
+
+        //alert('finished folder func');
+      }
+      async function getFolderId() {
+        let name = 'formAtize';
+        let response;
+        let id;
+        try {
+          response = await gapi.client.drive.files.list({
+            //'pageSize': 100, //TODO: set limit?
+            'fields': 'files(id, name)',
+          });
+        } catch (err) {
+          id = makeNewFolder(name);
+          return id;
+        }
+        const files = response.result.files;
+        if (!files || files.length == 0) {
+          id = makeNewFolder(name);
+          return id;
+        }
+        // Flatten to string to display
+        files.reduce((str, file) => {
+          if(file.name == name)
+          {
+            alert('Found it!');
+            return file.id;
+          }
+        });
+        id = makeNewFolder(name);
+        return id;
+      }
+
+      let FOLDER_ID;
+      //alert(`Folder id is: ${FOLDER_ID}\nAKA: ${JSON.stringify(FOLDER_ID, null, 4)}`);
+
+      // Discovery doc URL for APIs used by the quickstart
+      const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      const SCOPES = 'https://www.googleapis.com/auth/drive';
+
+      let tokenClient;
+      let gapiInited = true;
+      let gisInited = true;
+
+      document.getElementById('authorize_button').style.visibility = 'hidden';
+      document.getElementById('signout_button').style.visibility = 'hidden';
+      document.getElementById('popup_window').style.visibility = 'hidden';
+      document.getElementById("document_load").style.visibility = "hidden"
+
+      //alert(require('./secrets.json'));
+
+      /**
+       * Callback after api.js is loaded.
+       */
+      function gapiLoaded() {
+        gapi.load('client', initializeGapiClient);
+      }
+
+      /**
+       * Callback after the API client is loaded. Loads the
+       * discovery doc to initialize the API.
+       */
+      async function initializeGapiClient() {
+        await gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+      }
+
+      /**
+       * Callback after Google Identity Services are loaded.
+       */
+      function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '', // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+      }
+
+      /**
+       * Enables user interaction after all libraries are loaded.
+       */
+      function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+          document.getElementById('authorize_button').style.visibility = 'visible';
+        }
+      }
+
+      /**
+       *  Sign in the user upon button click.
+       */
+      function handleAuthClick() {
+        tokenClient.callback = async (resp) => {
+          if (resp.error !== undefined) {
+            throw (resp);
+          }
+          document.getElementById('signout_button').style.visibility = 'visible';
+          document.getElementById('authorize_button').innerText = 'Change User';
+          
+          //TODO: This is launching point for program -- Change later
+          FOLDER_ID = '1PpcJgOiyBlSbEkCRIIEHdBf4ZHWpYO1T' //await getFolderId(); //TODO: fix
+          //let myId = makeNewFolder('Test Folder');
+          //alert(`Folder made:\n${JSON.stringify(myId, null, 4)}`);
+          //document.getElementById("document_text").value = window.open("secrets.json");//TODO: fix and delete
+          // Get and show the popup window element
+          document.getElementById("popup_window").style.visibility = 'visible';
+        };
+
+        if (gapi.client.getToken() === null) {
+          // Prompt the user to select a Google Account and ask for consent to share their data
+          // when establishing a new session.
+          tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+          // Skip display of account chooser and consent dialog for an existing session.
+          tokenClient.requestAccessToken({prompt: ''});
+        }
+      }
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken('');
+          document.getElementById('content').innerText = '';
+          document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('signout_button').style.visibility = 'hidden';
+        }
+      }
+
+      /**
+       * Create a document
+       */
+      function handleCreateClick() {
+        // Get the popup window element
+        let fileId = 0;
+
+        // Hide the popup window when the create button is clicked
+        document.getElementById("popup_window").style.visibility = "hidden";
+
+        //Create document with data from popup window
+        var fileContent = `${document.getElementById("document_text").value}`; // As a sample, upload a text file.
+        var file = new Blob([fileContent], {type: 'text/plain'});
+        var metadata = {
+            'name': `${document.getElementById("document_title").value}`, // Filename at Google Drive
+            'mimeType': 'text/plain', // mimeType at Google Drive
+            'parents': [FOLDER_ID], // Folder ID at Google Drive
+        };
+
+        var accessToken = gapi.auth.getToken().access_token; // Here gapi is used for retrieving the access token.
+        var form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+        form.append('file', file);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('post', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+        xhr.responseType = 'json';
+        xhr.onload = () => {
+            console.log(xhr.response.id); // Retrieve uploaded file ID.
+        };
+        xhr.send(form);
+
+        //TODO: change?
+        //Show document retrieval text area
+        document.getElementById("document_load").style.visibility = "visible";
+
+        listFiles();
+      }
+
+      /**
+       * Load a document
+       */
+       async function handleLoadClick() {
+        let fileId = document.getElementById('document_id').value;
+        request = gapi.client.drive.files.get({
+          'fileId': fileId
+        });
+
+        const res = await gapi.client.drive.files.get({
+          'fileId': fileId,
+          'alt': 'media',
+        }, {
+          'responseType': 'arraybuffer',
+        });
+
+        document.getElementById("document_body").value = JSON.parse(JSON.stringify(res, null, 4)).body;
+      }
+
+      /**
+       * Print metadata for first 10 files.
+       */
+      async function listFiles() {
+        let response;
+        try {
+          response = await gapi.client.drive.files.list({
+            //'pageSize': 100, //TODO: set limit?
+            'fields': 'files(id, name)',
+            'parents': [FOLDER_ID], // Folder ID at Google Drive
+          });
+        } catch (err) {
+          document.getElementById('content').innerText = err.message;
+          return;
+        }
+        const files = response.result.files;
+        if (!files || files.length == 0) {
+          document.getElementById('content').innerText = 'No files found.';
+          return;
+        }
+        // Flatten to string to display
+        const output = files.reduce(
+            (str, file) => `${str}${file.name} (${file.id})\n`,
+            'Files:\n');
+        document.getElementById('content').innerText = output;
+      }
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  </body>
+</html>
