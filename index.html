@@ -36,77 +36,51 @@
       const API_KEY = 'AIzaSyB_cVGez_ASJg33xq7fqO35_tRf-NiXC1M';
 
       async function makeNewFolder(name) {
-        return -1;
-        /*//alert('In func');
+        let id = -1;
         var body = {
           'name': name,
           'mimeType': 'application/vnd.google-apps.folder',
         };
 
-        //alert('After body');
-        var request = gapi.client.drive.files.insert({
+        var request = await gapi.client.drive.files.create({
           'resource': body,
         });
-        //alert('After request');
 
-        request.execute(function(resp) {
-          //alert('Folder ID: ' + resp.id);
-        });
-        /*let fileMetadata = {
-          'name': name,
-        };
+        id = JSON.parse(JSON.parse(JSON.stringify(request, null, 4)).body).id
 
-        let media = {
-          'mimeType': 'application/vnd.google-apps.folder',
-        };
-
-        alert('In func');
-        let returnVar = gapi.client.drive.files.create({
-          'resource': fileMetadata,
-          'media': media,
-          'fields': 'id',
-        });
-
-        /*, function(err, file) {
-          if (err) {
-            // Handle error
-            alert('Failed to create folder.');
-            return -1;
-          } else {
-            alert('Created folder successfully');
-            return file.id;
-          }
-        }*/
-
-        //alert('finished folder func');
+        return id;
       }
       async function getFolderId() {
         let name = 'formAtize';
         let response;
-        let id;
+        let id = -1;
         try {
           response = await gapi.client.drive.files.list({
-            //'pageSize': 100, //TODO: set limit?
             'fields': 'files(id, name)',
           });
         } catch (err) {
-          id = makeNewFolder(name);
+          id = await makeNewFolder(name);
           return id;
         }
         const files = response.result.files;
         if (!files || files.length == 0) {
-          id = makeNewFolder(name);
+          id = await makeNewFolder(name);
           return id;
         }
+
         // Flatten to string to display
         files.reduce((str, file) => {
           if(file.name == name)
           {
-            alert('Found it!');
+            id = file.id;
             return file.id;
           }
         });
-        id = makeNewFolder(name);
+
+        if(id == -1) {
+          id = await makeNewFolder(name);
+        }
+        
         return id;
       }
 
@@ -185,10 +159,10 @@
           document.getElementById('authorize_button').innerText = 'Change User';
           
           //TODO: This is launching point for program -- Change later
-          FOLDER_ID = '1PpcJgOiyBlSbEkCRIIEHdBf4ZHWpYO1T' //await getFolderId(); //TODO: fix
-          //let myId = makeNewFolder('Test Folder');
-          //alert(`Folder made:\n${JSON.stringify(myId, null, 4)}`);
-          //document.getElementById("document_text").value = window.open("secrets.json");//TODO: fix and delete
+          await getFolderId().then(function(id){
+            FOLDER_ID = id;
+            alert(FOLDER_ID);
+          });
           // Get and show the popup window element
           document.getElementById("popup_window").style.visibility = 'visible';
         };
