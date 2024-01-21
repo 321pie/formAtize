@@ -8,28 +8,16 @@
     <p>Drive API Demo</p>
 
     <!--Add buttons to initiate auth sequence and sign out-->
-    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
-    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
-
-    <div id="popup_window">
-      <h1>Please enter document title</h1>
-      <textarea name="document-title" id="document_title" cols="45" rows="1"></textarea>
-      <h1>Please enter document text</h1>
-      <textarea name="document-text" id="document_text" cols="45" rows="10"></textarea>
-      <button id="create_button" onclick="handleCreateClick()">Create</button>
+    <div id="oauth_buttons">
+      <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+      <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
     </div>
 
-    <div id="document_load">
-      <h1>Please enter document id</h1>
-      <textarea id="document_id" cols="45" rows="1"></textarea>
-      <button id="create_button" onclick="handleLoadClick()">Load</button>
-      <br></br>
-      <textarea id="document_body" cols="45" rows="10"></textarea>
-      <br></br>
-      <button id="refresh_button" onclick="listFiles()">Refresh Files</button>
+    <div>
+      <button id="create_document_button" onclick="handleCreateDocumentClick()">New Document</button>
     </div>
 
-    <pre id="content" style="white-space: pre-wrap;"></pre>
+    <div id="file_list"></div>
 
     <script type="text/javascript">
       const CLIENT_ID = '576519804905-crn5en1klti0nue1qq146fuj4keo9vvs.apps.googleusercontent.com';
@@ -101,7 +89,9 @@
       document.getElementById('authorize_button').style.visibility = 'hidden';
       document.getElementById('signout_button').style.visibility = 'hidden';
       document.getElementById('popup_window').style.visibility = 'hidden';
-      document.getElementById("document_load").style.visibility = "hidden"
+      document.getElementById('document_load').style.visibility = 'hidden';
+      document.getElementById('create_document_button').style.visibility = 'hidden';
+
 
       //alert(require('./secrets.json'));
 
@@ -157,14 +147,18 @@
           }
           document.getElementById('signout_button').style.visibility = 'visible';
           document.getElementById('authorize_button').innerText = 'Change User';
-          
+
           //TODO: This is launching point for program -- Change later
-          await getFolderId().then(function(id){
+          document.getElementById('create_document_button').style.visibility = 'visible';
+          document.getElementById('refresh_button').style.visibility = 'visible';
+
+          getFolderId().then(function(id){
             FOLDER_ID = id;
-            alert(FOLDER_ID);
+            listFiles();
           });
+
           // Get and show the popup window element
-          document.getElementById("popup_window").style.visibility = 'visible';
+          //document.getElementById("popup_window").style.visibility = 'visible';
         };
 
         if (gapi.client.getToken() === null) {
@@ -194,23 +188,20 @@
       /**
        * Create a document
        */
-      function handleCreateClick() {
-        // Get the popup window element
-        let fileId = 0;
-
-        // Hide the popup window when the create button is clicked
-        document.getElementById("popup_window").style.visibility = "hidden";
+      function handleCreateDocumentClick() {
+        let fileId = -1;
+        let fileName = prompt("Document name", "Title");
 
         //Create document with data from popup window
-        var fileContent = `${document.getElementById("document_text").value}`; // As a sample, upload a text file.
+        var fileContent = '';
         var file = new Blob([fileContent], {type: 'text/plain'});
         var metadata = {
-            'name': `${document.getElementById("document_title").value}`, // Filename at Google Drive
+            'name': `${fileName}`, // Filename at Google Drive
             'mimeType': 'text/plain', // mimeType at Google Drive
             'parents': [FOLDER_ID], // Folder ID at Google Drive
         };
 
-        var accessToken = gapi.auth.getToken().access_token; // Here gapi is used for retrieving the access token.
+        var accessToken = gapi.auth.getToken().access_token; // Use gapi to retrieve the access token
         var form = new FormData();
         form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
         form.append('file', file);
@@ -220,34 +211,25 @@
         xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
         xhr.responseType = 'json';
         xhr.onload = () => {
-            console.log(xhr.response.id); // Retrieve uploaded file ID.
+            fileId = xhr.response.id; // Retrieve uploaded file ID.
         };
         xhr.send(form);
 
-        //TODO: change?
-        //Show document retrieval text area
-        document.getElementById("document_load").style.visibility = "visible";
-
-        listFiles();
+        return fileId;
       }
+
+      
 
       /**
        * Load a document
        */
-       async function handleLoadClick() {
-        let fileId = document.getElementById('document_id').value;
-        request = gapi.client.drive.files.get({
-          'fileId': fileId
-        });
+       async function handleLoadDocumentClick(fileName, fileId) {
+        //Set necessary variables
+        localStorage.setItem('fileName', `${fileName}`);
+        localStorage.setItem('fileId', `${fileId}`);
 
-        const res = await gapi.client.drive.files.get({
-          'fileId': fileId,
-          'alt': 'media',
-        }, {
-          'responseType': 'arraybuffer',
-        });
-
-        document.getElementById("document_body").value = JSON.parse(JSON.stringify(res, null, 4)).body;
+        //Change to document page
+        window.location.href = "/Frontend/Document.html";
       }
 
       /**
@@ -255,11 +237,11 @@
        */
       async function listFiles() {
         let response;
+        document.getElementById('file_list').innerHTML = ''; //Clear buttons
         try {
           response = await gapi.client.drive.files.list({
-            //'pageSize': 100, //TODO: set limit?
             'fields': 'files(id, name)',
-            'parents': [FOLDER_ID], // Folder ID at Google Drive
+            'q': `'${FOLDER_ID}' in parents`, // Folder ID in Google Drive
           });
         } catch (err) {
           document.getElementById('content').innerText = err.message;
@@ -272,9 +254,7 @@
         }
         // Flatten to string to display
         const output = files.reduce(
-            (str, file) => `${str}${file.name} (${file.id})\n`,
-            'Files:\n');
-        document.getElementById('content').innerText = output;
+          (str, file) => document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick(${file.name}, ${file.id})">${file.name}</button>\n<br></br>`);
       }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
