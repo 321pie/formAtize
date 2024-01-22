@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
   </head>
   <body>
-    <p>Drive API Demo</p>
+    <p>formAtize</p>
 
     <!--Add buttons to initiate auth sequence and sign out-->
     <div id="oauth_buttons">
@@ -184,17 +184,19 @@
       /**
        * Create a document
        */
-      function handleCreateDocumentClick() {
+      function handleCreateDocumentClick(fileText = '') {
         let fileId = -1;
         let fileName = prompt("Document name", "Title");
 
+        //TODO: Check for duplicate document name
+
         //Create document with data from popup window
-        var fileContent = '';
+        var fileContent = `${fileText}`;
         var file = new Blob([fileContent], {type: 'text/plain'});
         var metadata = {
-            'name': `${fileName}`, // Filename at Google Drive
-            'mimeType': 'text/plain', // mimeType at Google Drive
-            'parents': [FOLDER_ID], // Folder ID at Google Drive
+            'name': `${fileName}`,
+            'mimeType': 'text/plain',
+            'parents': [FOLDER_ID], // Folder ID in Google Drive
         };
 
         var accessToken = gapi.auth.getToken().access_token; // Use gapi to retrieve the access token
@@ -214,8 +216,6 @@
         return fileId;
       }
 
-      
-
       /**
        * Load a document
        */
@@ -229,7 +229,7 @@
       }
 
       /**
-       * Print metadata for first 10 files.
+       * Populate list of files
        */
       async function listFiles() {
         let response;
@@ -250,7 +250,7 @@
         }
         // Make buttons for every file
         for(const file in files) {
-          document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick(${files[file].name}, ${files[file].id})">${files[file].name}</button>\n<br></br>`
+          document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick('${files[file].name}', '${files[file].id}')">${files[file].name}</button>\n<br></br>`
         };
       }
     </script>

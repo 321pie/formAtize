@@ -26,7 +26,7 @@
         </ul>
     </div>
 
-    <script>
+    <script type="text/javascript">
         //Retrieve data from local storage and reet for future documents
         const FILE_ID = localStorage.getItem("fileId");
         document.getElementById('document_name').innerText = localStorage.getItem("fileName");
@@ -36,56 +36,43 @@
         let request = gapi.client.drive.files.get({
           'fileId': fileId
         });
-
-        const res = await gapi.client.drive.files.get({
+        const res = gapi.client.drive.files.get({
           'fileId': fileId,
           'alt': 'media',
         }, {
           'responseType': 'arraybuffer',
         });
-
         document.getElementById("document_body").value = JSON.parse(JSON.stringify(res, null, 4)).body;
 
+        /*
+        *Return to the home page
+        */
+        function handleHomePageClick() {
+            //Change to home page
+            window.location.href = "../index.html";
+        }
 
-        /**
-       * Create a document
-       
-      function handleCreateClick() {
-        // Get the popup window element
-        let fileId = 0;
-
-        // Hide the popup window when the create button is clicked
-        document.getElementById("popup_window").style.visibility = "hidden";
-
-        //Create document with data from popup window
-        var fileContent = `${document.getElementById("document_text").value}`; // As a sample, upload a text file.
-        var file = new Blob([fileContent], {type: 'text/plain'});
-        var metadata = {
-            'name': `${document.getElementById("document_title").value}`, // Filename at Google Drive
-            'mimeType': 'text/plain', // mimeType at Google Drive
-            'parents': [FOLDER_ID], // Folder ID at Google Drive
-        };
-
-        var accessToken = gapi.auth.getToken().access_token; // Here gapi is used for retrieving the access token.
-        var form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-        form.append('file', file);
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('post', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id');
-        xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-        xhr.responseType = 'json';
-        xhr.onload = () => {
-            console.log(xhr.response.id); // Retrieve uploaded file ID.
-        };
-        xhr.send(form);
-
-        //TODO: change?
-        //Show document retrieval text area
-        document.getElementById("document_load").style.visibility = "visible";
-
-        listFiles();
-      }*/
+        /*
+        *Save the document
+        */
+        function handleSaveDocumentClick() {
+            const url = 'https://www.googleapis.com/upload/drive/v3/files/' + FILE_ID + '?uploadType=media';
+            fetch(url, {
+                'method': 'PATCH',
+                'headers': new Headers({
+                    'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
+                    'Content-type': 'text/plain'
+                }),
+                'body': `${document.getElementById('block1').value}`
+            })
+                .then(result => result.json())
+                .then(value => {
+                    console.log('Updated. Result:\n' + JSON.stringify(value, null, 2));
+                })
+                .catch(err => console.error(err))
+        }
     </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
