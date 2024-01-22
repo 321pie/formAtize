@@ -81,13 +81,12 @@
       // Discovery doc URL for APIs used by the quickstart
       const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 
-      // Authorization scopes required by the API; multiple scopes can be
-      // included, separated by spaces.
+      // Authorization scopes required by the API; multiple scopes can be included, separated by spaces.
       const SCOPES = 'https://www.googleapis.com/auth/drive';
 
       let tokenClient;
-      let gapiInited = true;
-      let gisInited = true;
+      let gapiInited = false;
+      let gisInited = false;
 
       document.getElementById('authorize_button').style.visibility = 'hidden';
       document.getElementById('signout_button').style.visibility = 'hidden';
@@ -223,6 +222,7 @@
         //Set necessary variables
         localStorage.setItem('fileName', `${fileName}`);
         localStorage.setItem('fileId', `${fileId}`);
+        localStorage.setItem('accessToken', `${gapi.auth.getToken().accessToken}`);
 
         //Change to document page
         window.location.href = "/Frontend/Document.html";
