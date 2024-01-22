@@ -17,6 +17,10 @@
       <button id="create_document_button" onclick="handleCreateDocumentClick()">New Document</button>
     </div>
 
+    <div>
+      <button id="refresh_button" onclick="listFiles()">Refresh Files</button>
+    </div>
+
     <div id="file_list"></div>
 
     <script type="text/javascript">
@@ -44,7 +48,7 @@
         let id = -1;
         try {
           response = await gapi.client.drive.files.list({
-            'fields': 'files(id, name)',
+            'fields': 'files(id, name, mimeType)',
           });
         } catch (err) {
           id = await makeNewFolder(name);
@@ -58,7 +62,7 @@
 
         // Flatten to string to display
         files.reduce((str, file) => {
-          if(file.name == name)
+          if((file.name == name) && (file.mimeType == 'application/vnd.google-apps.folder'))
           {
             id = file.id;
             return file.id;
@@ -73,7 +77,6 @@
       }
 
       let FOLDER_ID;
-      //alert(`Folder id is: ${FOLDER_ID}\nAKA: ${JSON.stringify(FOLDER_ID, null, 4)}`);
 
       // Discovery doc URL for APIs used by the quickstart
       const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
@@ -88,12 +91,8 @@
 
       document.getElementById('authorize_button').style.visibility = 'hidden';
       document.getElementById('signout_button').style.visibility = 'hidden';
-      document.getElementById('popup_window').style.visibility = 'hidden';
-      document.getElementById('document_load').style.visibility = 'hidden';
       document.getElementById('create_document_button').style.visibility = 'hidden';
-
-
-      //alert(require('./secrets.json'));
+      document.getElementById('refresh_button').style.visibility = 'hidden';
 
       /**
        * Callback after api.js is loaded.
@@ -148,7 +147,7 @@
           document.getElementById('signout_button').style.visibility = 'visible';
           document.getElementById('authorize_button').innerText = 'Change User';
 
-          //TODO: This is launching point for program -- Change later
+          // Launching point for program
           document.getElementById('create_document_button').style.visibility = 'visible';
           document.getElementById('refresh_button').style.visibility = 'visible';
 
@@ -156,9 +155,6 @@
             FOLDER_ID = id;
             listFiles();
           });
-
-          // Get and show the popup window element
-          //document.getElementById("popup_window").style.visibility = 'visible';
         };
 
         if (gapi.client.getToken() === null) {
@@ -252,9 +248,10 @@
           document.getElementById('content').innerText = 'No files found.';
           return;
         }
-        // Flatten to string to display
-        const output = files.reduce(
-          (str, file) => document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick(${file.name}, ${file.id})">${file.name}</button>\n<br></br>`);
+        // Make buttons for every file
+        for(const file in files) {
+          document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick(${files[file].name}, ${files[file].id})">${files[file].name}</button>\n<br></br>`
+        };
       }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
