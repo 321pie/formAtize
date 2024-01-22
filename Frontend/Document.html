@@ -25,27 +25,27 @@
             <li><button>Display</button></li>
         </ul>
     </div>
-
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    
     <script type="text/javascript">
         //Retrieve data from local storage and reet for future documents
         const FILE_ID = localStorage.getItem("fileId");
-        const ACESS_TOKEN = localStorage.getItem("accessToken");
+        const ACCESS_TOKEN = JSON.parse(localStorage.getItem("accessToken"));
+        alert(alert(JSON.stringify(ACCESS_TOKEN, null, 4)));
         document.getElementById('document_name').innerText = localStorage.getItem("fileName");
         localStorage.clear();
 
         //API variables
         const CLIENT_ID = '576519804905-crn5en1klti0nue1qq146fuj4keo9vvs.apps.googleusercontent.com';
         const API_KEY = 'AIzaSyB_cVGez_ASJg33xq7fqO35_tRf-NiXC1M';
+        let gapi = window.gapi;
 
         // Discovery doc URL for APIs used by the quickstart
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 
         // Authorization scopes required by the API; multiple scopes can be included, separated by spaces.
         const SCOPES = 'https://www.googleapis.com/auth/drive';
-
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
 
         /**
          * Callback after api.js is loaded.
@@ -63,32 +63,50 @@
             apiKey: API_KEY,
             discoveryDocs: [DISCOVERY_DOC],
             });
-            gapiInited = true;
         }
 
         /**
          * Callback after Google Identity Services are loaded.
          */
         function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: SCOPES,
-            callback: '', // defined later
+            google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // defined later
             });
-            gisInited = true;
         }
 
+        //Initialize gapi to retrieve data
+        //gapiLoaded();
+        //gisLoaded();
+
+        gapi.load('client', function () {
+                gapi.client.load('drive', 'v3', function () {
+                    var file = gapi.client.drive.files.get({ 'fileId': FILE_ID });
+                    file.execute(function (response) {
+                        //Write you code with response variable
+                        document.getElementById("block1").value = JSON.parse(JSON.stringify(response, null, 4)).body;
+                    });
+
+                });
+            });
+
+        /*let response = gapi.client.request({
+            'fileId': FILE_ID,
+            'alt': 'media',
+            }, {
+            'responseType': 'arraybuffer',
+        });*/
+
         //Load document text
-        let request = await gapi.client.drive.files.get({
-          'fileId': fileId
-        });
-        const res = await gapi.client.drive.files.get({
-          'fileId': fileId,
-          'alt': 'media',
+        /*const response = gapi.client.drive.files.get({
+            'fileId': fileId,
+            'alt': 'media',
         }, {
-          'responseType': 'arraybuffer',
+            'responseType': 'arraybuffer',
         });
-        document.getElementById("document_body").value = JSON.parse(JSON.stringify(res, null, 4)).body;
+        document.getElementById("block1").value = JSON.parse(JSON.stringify(response, null, 4)).body;
+        */
 
         /*
         *Return to the home page
@@ -106,7 +124,7 @@
             fetch(url, {
                 'method': 'PATCH',
                 'headers': new Headers({
-                    'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
+                    'Authorization': 'Bearer ' + ACCESS_TOKEN, //TODO: Code works, but access token doesn't?
                     'Content-type': 'text/plain'
                 }),
                 'body': `${document.getElementById('block1').value}`
@@ -119,7 +137,7 @@
         }
     </script>
 
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+    <!--<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>-->
 </body>
 </html>
