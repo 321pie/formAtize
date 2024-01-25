@@ -38,10 +38,6 @@
         async function loadText() {
             let fileId = JSON.parse(FILE_ID);
 
-            /*request = gapi.client.drive.files.get({
-            'fileId': fileId
-            });*/
-
             let res = await gapi.client.drive.files.get({
             'fileId': fileId,
             'alt': 'media',
