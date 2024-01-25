@@ -25,7 +25,9 @@
             <li><button>Display</button></li>
         </ul>
     </div>
-
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    
     <script type="text/javascript">
         //Retrieve data from local storage and reet for future documents
         const FILE_ID = localStorage.getItem("fileId");
@@ -67,7 +69,7 @@
             fetch(url, {
                 'method': 'PATCH',
                 'headers': new Headers({
-                    'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
+                    'Authorization': 'Bearer ' + ACCESS_TOKEN, //TODO: Code works, but access token doesn't?
                     'Content-type': 'text/plain'
                 }),
                 'body': `${document.getElementById('block1').value}`
