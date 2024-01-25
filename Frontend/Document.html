@@ -29,80 +29,41 @@
     <script type="text/javascript">
         //Retrieve data from local storage and reet for future documents
         const FILE_ID = localStorage.getItem("fileId");
-        const ACESS_TOKEN = localStorage.getItem("accessToken");
         document.getElementById('document_name').innerText = localStorage.getItem("fileName");
         localStorage.clear();
 
-        //API variables
-        const CLIENT_ID = '576519804905-crn5en1klti0nue1qq146fuj4keo9vvs.apps.googleusercontent.com';
-        const API_KEY = 'AIzaSyB_cVGez_ASJg33xq7fqO35_tRf-NiXC1M';
-
-        // Discovery doc URL for APIs used by the quickstart
-        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-
-        // Authorization scopes required by the API; multiple scopes can be included, separated by spaces.
-        const SCOPES = 'https://www.googleapis.com/auth/drive';
-
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
-
-        /**
-         * Callback after api.js is loaded.
-         */
-        function gapiLoaded() {
-            gapi.load('client', initializeGapiClient);
-        }
-
-        /**
-         * Callback after the API client is loaded. Loads the
-         * discovery doc to initialize the API.
-         */
-        async function initializeGapiClient() {
-            await gapi.client.init({
-            apiKey: API_KEY,
-            discoveryDocs: [DISCOVERY_DOC],
-            });
-            gapiInited = true;
-        }
-
-        /**
-         * Callback after Google Identity Services are loaded.
-         */
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: SCOPES,
-            callback: '', // defined later
-            });
-            gisInited = true;
-        }
-
         //Load document text
-        let request = await gapi.client.drive.files.get({
-          'fileId': fileId
-        });
-        const res = await gapi.client.drive.files.get({
-          'fileId': fileId,
-          'alt': 'media',
-        }, {
-          'responseType': 'arraybuffer',
-        });
-        document.getElementById("document_body").value = JSON.parse(JSON.stringify(res, null, 4)).body;
+        async function loadText() {
+            let fileId = JSON.parse(FILE_ID);
+
+            /*request = gapi.client.drive.files.get({
+            'fileId': fileId
+            });*/
+
+            let res = await gapi.client.drive.files.get({
+            'fileId': fileId,
+            'alt': 'media',
+            }, {
+            'responseType': 'arraybuffer',
+            });
+
+            document.getElementById("block1").value = JSON.parse(JSON.stringify(res, null, 4)).body;
+        }
+        loadText(); //Must be async
 
         /*
         *Return to the home page
         */
         function handleHomePageClick() {
             //Change to home page
-            window.location.href = "../index.html";
+            window.location.reload();
         }
 
         /*
         *Save the document
         */
         function handleSaveDocumentClick() {
-            const url = 'https://www.googleapis.com/upload/drive/v3/files/' + FILE_ID + '?uploadType=media';
+            const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
             fetch(url, {
                 'method': 'PATCH',
                 'headers': new Headers({
@@ -115,11 +76,7 @@
                 .then(value => {
                     console.log('Updated. Result:\n' + JSON.stringify(value, null, 2));
                 })
-                .catch(err => console.error(err))
         }
     </script>
-
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
