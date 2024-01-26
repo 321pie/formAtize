@@ -68,8 +68,8 @@ textarea{
     max-height: 130vw;
     min-width: 100%;
     resize: none;
-    border-color: white;
-    background-color: teal;
+    border-color: teal;
+    background-color: white;
     color: white;
     padding: 0;
     border-top: 1px;
