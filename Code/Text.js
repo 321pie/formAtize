@@ -1,4 +1,4 @@
-class Text {
+export class Text {
     #m_text;
     #m_isDirty = true;
     #m_font;

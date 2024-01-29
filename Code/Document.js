@@ -1,4 +1,6 @@
-class Document {
+import {Page} from './Page.js';
+
+export class Document {
     #m_name;
     #m_isDirty = true;
     #m_description = "";
@@ -7,7 +9,7 @@ class Document {
 
     constructor(name) {
         this.#m_name = name;
-        this.#m_pages.AddPage();
+        this.AddPage(1);
     }
 
     GetPageCount() {
@@ -16,7 +18,7 @@ class Document {
 
     AddPage(number) {
         this.#m_isDirty = true;
-        this.#m_pages.splice(number, 0, Page()); //TODO: +1?
+        this.#m_pages.splice(number, 0, new Page()); //TODO: +1?
 
         return this.#m_pages.length;
     }

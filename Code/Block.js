@@ -1,4 +1,6 @@
-class Block {
+import {Text} from './Text.js';
+
+export class Block {
     #m_isDirty = true;
     #m_type;
     #m_priority;
@@ -34,7 +36,7 @@ class Block {
         return this.#m_isDirty;
     }
 
-    AddText(number, textObject = Text()) {
+    AddText(number, textObject = new Text()) {
         this.#m_isDirty = true;
         this.#m_text.splice(number, 0, textObject); //TODO: +1?
 

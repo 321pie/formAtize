@@ -1,5 +1,7 @@
-class Page {
-    #m_blocks = [Block()];
+import {Block} from './Block.js';
+
+export class Page {
+    #m_blocks = [];
     #m_isDirty = true;
     #m_header;
     #m_footer;
@@ -9,7 +11,7 @@ class Page {
     //Adds a Block to the page
     AddBlock(number) {
         this.#m_isDirty = true;
-        this.#m_blocks.splice(number, 0, Block()); //TODO: +1?
+        this.#m_blocks.splice(number, 0, new Block()); //TODO: +1?
 
         return this.#m_blocks.length;
     }

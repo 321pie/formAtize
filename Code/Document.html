@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="Document.css">
+    <title>Document</title>
+</head>
+<body>
+    <div id="home_menu">
+        <ul>
+            <li><button onclick="handleHomePageClick()">Back</button></li>
+            <li id="document_name">Document</li>
+            <li><button onclick="handleSaveDocumentClick()">Save</button></li>
+        </ul>
+    </div>
+
+    <div id="pages">
+        <div id="page1">
+            <textarea id="block1"></textarea>
+        </div>
+    </div>
+
+    <div id="editing_menus">
+        <div id="selected_menu">
+            <!--Fill this div with items for the selected menu-->
+        </div>
+        <ul>
+            <li><button onclick="handleBlockMenuClick()">Block</button></li>
+            <li><button onclick="handleEditMenuClick()">Edit</button></li>
+            <li><button onclick="handleDisplayMenuClick()">Display</button></li>
+        </ul>
+    </div>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script type="text/javascript" src="./Document.js"></script>
+    
+    <script type="text/javascript">
+        //Import Document class
+        //import {Document} from "./Document.js";
+
+        //Retrieve data from local storage and clear for future documents
+        const FILE_ID = localStorage.getItem("fileId");
+        let DOCUMENT = new Document(localStorage.getItem("fileName"));
+        localStorage.clear();
+
+        //Hide selected menu
+        document.getElementById("selected_menu").style.visibility = 'hidden';
+
+        //Load document text
+        async function loadText() {
+            let fileId = JSON.parse(FILE_ID);
+
+            let res = await gapi.client.drive.files.get({
+            'fileId': fileId,
+            'alt': 'media',
+            }, {
+            'responseType': 'arraybuffer',
+            });
+
+            document.getElementById("block1").value = JSON.parse(JSON.stringify(res, null, 4)).body;
+        }
+
+        //Load document
+        document.getElementById('document_name').innerText = DOCUMENT.GetName();
+        loadText(); //Must be async
+
+        /*
+        *Return to the home page
+        */
+        function handleHomePageClick() {
+            //Change to home page
+            window.location.reload();
+        }
+
+        /*
+        *Save the document
+        */
+        function handleSaveDocumentClick() {
+            const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
+            fetch(url, {
+                'method': 'PATCH',
+                'headers': new Headers({
+                    'Authorization': 'Bearer ' + gapi.auth.getToken().access_token, //TODO: Code works, but access token doesn't?
+                    'Content-type': 'text/plain'
+                }),
+                'body': `${document.getElementById('block1').value}`
+            }).then(alert('File saved.'));
+        }
+
+        let slideUp = (target, duration=500) => {
+            target.style.transitionProperty = 'height, margin, padding';
+            target.style.transitionDuration = duration + 'ms';
+            target.style.boxSizing = 'border-box';
+            target.style.height = target.offsetHeight + 'px';
+            target.offsetHeight;
+            target.style.overflow = 'hidden';
+            target.style.height = 0;
+            target.style.paddingTop = 0;
+            target.style.paddingBottom = 0;
+            target.style.marginTop = 0;
+            target.style.marginBottom = 0;
+            window.setTimeout( () => {
+                target.style.display = 'none';
+                target.style.removeProperty('height');
+                target.style.removeProperty('padding-top');
+                target.style.removeProperty('padding-bottom');
+                target.style.removeProperty('margin-top');
+                target.style.removeProperty('margin-bottom');
+                target.style.removeProperty('overflow');
+                target.style.removeProperty('transition-duration');
+                target.style.removeProperty('transition-property');
+                //alert("!");
+            }, duration);
+        }
+
+        let slideDown = (target, duration=500) => {
+            target.style.removeProperty('display');
+            let display = window.getComputedStyle(target).display;
+
+            if (display === 'none')
+                display = 'block';
+
+            target.style.display = display;
+            let height = target.offsetHeight;
+            target.style.overflow = 'hidden';
+            target.style.height = 0;
+            target.style.paddingTop = 0;
+            target.style.paddingBottom = 0;
+            target.style.marginTop = 0;
+            target.style.marginBottom = 0;
+            target.offsetHeight;
+            target.style.boxSizing = 'border-box';
+            target.style.transitionProperty = "height, margin, padding";
+            target.style.transitionDuration = duration + 'ms';
+            target.style.height = height + 'px';
+            target.style.removeProperty('padding-top');
+            target.style.removeProperty('padding-bottom');
+            target.style.removeProperty('margin-top');
+            target.style.removeProperty('margin-bottom');
+            window.setTimeout( () => {
+                target.style.removeProperty('height');
+                target.style.removeProperty('overflow');
+                target.style.removeProperty('transition-duration');
+                target.style.removeProperty('transition-property');
+            }, duration);
+        }
+
+        let slideToggle = (target, duration = 500) => {
+            if (window.getComputedStyle(target).display === 'none') {
+                return slideDown(target, duration);
+            } else {
+                return slideUp(target, duration);
+            }
+        }
+
+        function handleBlockMenuClick() {
+            let target = document.getElementById('pages');
+
+            if (window.getComputedStyle(target).display === 'none') {
+                //TODO: Clear div
+                document.getElementById("selected_menu").style.visibility = 'hidden';
+
+                return slideDown(target);
+            }
+            else {
+                //TODO: Populate div
+                document.getElementById("selected_menu").style.visibility = 'visible';
+
+                return slideUp(target);
+            }
+        }
+
+        function handleEditMenuClick() {
+            let target = document.getElementById('pages');
+
+            if (window.getComputedStyle(target).display === 'none') {
+                //TODO: Clear div
+                document.getElementById("selected_menu").style.visibility = 'hidden';
+
+                return slideDown(target);
+            }
+            else {
+                //TODO: Populate div
+                document.getElementById("selected_menu").style.visibility = 'visible';
+
+                return slideUp(target);
+            }
+        }
+
+        function handleDisplayMenuClick() {
+            let target = document.getElementById('pages');
+            let menu = document.getElementById("selected_menu");
+
+            //if (window.getComputedStyle(target).display === 'none') {
+            if(menu.innerHTML !== '') {
+                //TODO: Clear div
+                menu.innerHTML = '';
+                menu.style.visibility = 'hidden';
+
+                //return slideDown(target);
+            }
+            else {
+                //TODO: Populate div
+                menu.innerHTML = `
+                <div id="word_count">Word Count: ${'Put word count here!'}</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                <div>There's text here!</div>
+                `;
+                menu.style.visibility = 'visible';
+
+                //return slideUp(target);
+            }
+        }
+    </script>
+</body>
+</html>
