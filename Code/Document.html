@@ -37,7 +37,11 @@
     
     <script type="text/javascript">
         //Import Document class
-        //import {Document} from "./Document.js";
+        let myDoc = new Document('My doc');
+
+        console.log(JSON.stringify(myDoc, null, 4));
+
+        console.log(myDoc.GetName());
 
         //Retrieve data from local storage and clear for future documents
         const FILE_ID = localStorage.getItem("fileId");

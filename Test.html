@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="Document.css">
+        <title>Document</title>
+    </head>
+    <body>
+        <div>Loaded.</div>
+
+        <script type="text/javascript" src="./Code/Document.js"></script>
+        <script type="text/javascript">
+            //import { Document } from "./Code/Document.js";
+
+            let myDoc = new Document('My doc');
+
+            console.log(myDoc.GetName());
+            alert(myDoc.GetName());
+        </script>
+    </body>
+</html>
