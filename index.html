@@ -29,6 +29,8 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script type="text/javascript" src="./DocumentClasses.js"></script>
+
     <script type="text/javascript">
       const CLIENT_ID = '576519804905-crn5en1klti0nue1qq146fuj4keo9vvs.apps.googleusercontent.com';
       const API_KEY = 'AIzaSyB_cVGez_ASJg33xq7fqO35_tRf-NiXC1M';
@@ -228,7 +230,7 @@
         localStorage.setItem('fileId', JSON.stringify(fileId, 4, null));
 
         //Change to document page
-        $("#body").load("./Code/Document.html");
+        $("#body").load("./Document.html");
       }
 
       /**

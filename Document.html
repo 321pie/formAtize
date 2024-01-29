@@ -33,16 +33,8 @@
 
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
-    <script type="text/javascript" src="./Document.js"></script>
     
     <script type="text/javascript">
-        //Import Document class
-        let myDoc = new Document('My doc');
-
-        console.log(JSON.stringify(myDoc, null, 4));
-
-        console.log(myDoc.GetName());
-
         //Retrieve data from local storage and clear for future documents
         const FILE_ID = localStorage.getItem("fileId");
         let DOCUMENT = new Document(localStorage.getItem("fileName"));
@@ -81,6 +73,11 @@
         *Save the document
         */
         function handleSaveDocumentClick() {
+            //Load text into Document class
+            //TODO: Below makes copies. Need to do this in DocumentClasses.js
+            DOCUMENT.GetPages()[0].AddBlock(1).AddText(1, new Text(document.getElementById('block1').value));
+
+            //Send Document class
             const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
             fetch(url, {
                 'method': 'PATCH',
@@ -88,7 +85,7 @@
                     'Authorization': 'Bearer ' + gapi.auth.getToken().access_token, //TODO: Code works, but access token doesn't?
                     'Content-type': 'text/plain'
                 }),
-                'body': `${document.getElementById('block1').value}`
+                'body': `${JSON.stringify(DOCUMENT, null, 4)}`
             }).then(alert('File saved.'));
         }
 
