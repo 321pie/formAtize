@@ -15,8 +15,8 @@
     </div>
 
     <div id="pages">
-        <div id="page1">
-            <textarea id="block1"></textarea>
+        <div class="page">
+            <textarea class="block" id="block1"></textarea>
         </div>
     </div>
 
@@ -74,8 +74,22 @@
         */
         function handleSaveDocumentClick() {
             //Load text into Document class
-            //TODO: Below makes copies. Need to do this in DocumentClasses.js
-            DOCUMENT.GetPages()[0].AddBlock(1).AddText(1, new Text(document.getElementById('block1').value));
+            let pages = document.getElementsByClassName('page');
+            for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+                let curPage = new Page();
+                console.log('In page'); //TODO: delete
+                blocks = pages.item(pageIndex).getElementsByClassName('block');
+
+                for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+                    console.log('In block'); //TODO: delete
+                    curPage.AddBlock(new Text(blocks.item(blockIndex).innerText));
+                }
+
+                DOCUMENT.AddPage(curPage, DOCUMENT.GetPageCount());
+            }
+
+            //TODO: delete
+            console.log(JSON.stringify(DOCUMENT, null, 4));
 
             //Send Document class
             const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';

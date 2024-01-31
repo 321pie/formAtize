@@ -201,9 +201,8 @@ class Page {
     }
 
     //Adds a Block to the page
-    AddBlock(number) {
+    AddBlock(number, block = new Block()) {
         this.#m_isDirty = true;
-        let block = new Block();
         this.#m_blocks.splice(number, 0, block); //TODO: +1?
 
         return block;
@@ -277,16 +276,14 @@ class Document {
 
     constructor(name) {
         this.#m_name = name;
-        this.AddPage(1);
     }
 
     GetPageCount() {
         return this.#m_pages.length;
     }
 
-    AddPage(number) {
+    AddPage(number, page = new Page()) {
         this.#m_isDirty = true;
-        let page = new Page();
         this.#m_pages.splice(number, 0, page); //TODO: +1?
 
         return page;
