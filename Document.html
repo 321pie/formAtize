@@ -91,7 +91,7 @@
 
             //TODO: delete
             console.log(DOCUMENT.GetText());
-            console.log(JSON.stringify(DOCUMENT));
+            console.log(DOCUMENT.ToJSON());
             console.log(DOCUMENT);
 
             //Send Document class
@@ -102,7 +102,7 @@
                     'Authorization': 'Bearer ' + gapi.auth.getToken().access_token, //TODO: Code works, but access token doesn't?
                     'Content-type': 'text/plain'
                 }),
-                'body': `${DOCUMENT.toString()}`
+                'body': `${DOCUMENT.ToJSON()}`
             }).then(alert('File saved.'));
         }
 

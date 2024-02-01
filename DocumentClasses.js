@@ -82,6 +82,19 @@ class Words {
         this.#m_isDirty = true;
         this.#m_isUnderlined = isUnderlined;
     }
+
+    ToJSON(){
+        return {
+            m_text: this.#m_text,
+            m_isDirty: this.#m_isDirty,
+            m_font: this.#m_font,
+            m_fontSize: this.#m_fontSize,
+            m_fontColor: this.#m_fontColor,
+            m_isBold: this.#m_isBold,
+            m_isItalicized: this.#m_isItalicized,
+            m_isUnderlined: this.#m_isUnderlined
+        }
+    }
 }
 
 class Block {
@@ -91,7 +104,7 @@ class Block {
     #m_alignment;
     #m_text = [];
 
-    constructor(template=null, type='defualt', priority=3, alignment='left') {
+    constructor(template=null, type='default', priority=3, alignment='left') {
         this.#m_type = type;
         this.#m_priority = priority;
         this.#m_alignment = alignment;
@@ -182,6 +195,23 @@ class Block {
         this.#m_isDirty = true;
         this.#m_alignment = alignment;
     }
+
+    ToJSON(){
+        let myWords = {};
+        let text;
+        for (let textIndex = 0; textIndex < this.#m_text.length; textIndex++){
+            text = this.#m_text[textIndex].ToJSON();
+            myWords = {...myWords, text};
+        }
+
+        return {
+            m_isDirty: this.#m_isDirty,
+            m_type: this.#m_type,
+            m_priority: this.#m_priority,
+            m_alignment: this.#m_alignment,
+            m_text: myWords
+        }
+    }
 }
 
 class Page {
@@ -261,6 +291,22 @@ class Page {
         this.#m_isDirty = true;
         this.#m_footer = footer;
     }
+
+    ToJSON(){
+        let myBlocks = {};
+        let block;
+        for (let blockIndex = 0; blockIndex < this.#m_blocks.length; blockIndex++){
+            block = this.#m_blocks[blockIndex].ToJSON();
+            myBlocks = {...myBlocks, block};
+        }
+
+        return {
+            m_blocks: myBlocks,
+            m_isDirty: this.#m_isDirty,
+            m_header: this.#m_header,
+            m_footer: this.#m_footer
+        }
+    }
 }
 
 class Doc {
@@ -315,20 +361,13 @@ class Doc {
 
     GetText() {
         let text = "";
-        console.log(this.#m_pages[0]);
-        //console.log(this.#m_pages.length);
-        for (let i = 0; i < this.#m_pages.length; i++){
-            blocks = this.#m_pages[i].GetBlocks();
-            for (let j = 0; j < blocks.length; j++){
-                text += blocks[j].GetText();
+
+        for (let pageIndex = 0; pageIndex < this.#m_pages.length; pageIndex++){
+            blocks = this.#m_pages[pageIndex].GetBlocks();
+            for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++){
+                text += blocks[blockIndex].GetText();
             }
         }
-        // for(const page in this.#m_pages) {
-        //     blocks = page.GetBlocks();
-        //     for(const block in blocks) {
-        //         text += block.GetText();
-        //     }
-        // }
 
         return text;
     }
@@ -419,5 +458,29 @@ class Doc {
     SetDescription(description) {
         this.#m_isDirty = true;
         this.#m_description = description;
+    }
+
+    ToJSON(){
+        let myPages = {};
+        let page;
+        for (let pageIndex = 0; pageIndex < this.#m_pages.length; pageIndex++){
+            page = this.#m_pages[pageIndex].ToJSON();
+            myPages = {...myPages, page};
+        }
+
+        let myBlocks = {};
+        let block;
+        for (let blockIndex = 0; blockIndex < this.#m_blocks.length; blockIndex++){
+            block = this.#m_blocks[blockIndex].ToJSON();
+            myBlocks = {...myBlocks, block};
+        }
+
+        return JSON.stringify({
+            m_name: this.#m_name,
+            m_isDirty: this.#m_isDirty,
+            m_description: this.#m_description,
+            m_pages: myPages,
+            m_blocks: myBlocks
+        })
     }
 }
