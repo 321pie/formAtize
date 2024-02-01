@@ -33,11 +33,12 @@
 
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
+    <!--<script src="DocumentClasses.js" type="text/javascript"></script>-->
     
     <script type="text/javascript">
         //Retrieve data from local storage and clear for future documents
         const FILE_ID = localStorage.getItem("fileId");
-        let DOCUMENT = new Document(localStorage.getItem("fileName"));
+        let DOCUMENT = new Doc(localStorage.getItem("fileName"));
         localStorage.clear();
 
         //Hide selected menu
@@ -82,14 +83,16 @@
 
                 for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
                     console.log('In block'); //TODO: delete
-                    curPage.AddBlock(new Text(blocks.item(blockIndex).innerText));
+                    curPage.AddBlock(blocks.length, new Block([new Words(blocks.item(blockIndex).value)]));
                 }
 
-                DOCUMENT.AddPage(curPage, DOCUMENT.GetPageCount());
+                DOCUMENT.AddPage(DOCUMENT.GetPageCount(), curPage);
             }
 
             //TODO: delete
-            console.log(JSON.stringify(DOCUMENT, null, 4));
+            console.log(DOCUMENT.GetText());
+            console.log(JSON.stringify(DOCUMENT));
+            console.log(DOCUMENT);
 
             //Send Document class
             const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
@@ -99,7 +102,7 @@
                     'Authorization': 'Bearer ' + gapi.auth.getToken().access_token, //TODO: Code works, but access token doesn't?
                     'Content-type': 'text/plain'
                 }),
-                'body': `${JSON.stringify(DOCUMENT, null, 4)}`
+                'body': `${DOCUMENT.toString()}`
             }).then(alert('File saved.'));
         }
 

@@ -1,6 +1,4 @@
-//import {Page} from './Page.js';
-
-class Text {
+class Words {
     #m_text;
     #m_isDirty = true;
     #m_font;
@@ -10,7 +8,9 @@ class Text {
     #m_isItalicized;
     #m_isUnderlined;
 
-    constructor() {}
+    constructor(text='') {
+        this.#m_text = text;
+    }
 
     IsEmpty() {
         return this.#m_text.length == 0;
@@ -91,14 +91,14 @@ class Block {
     #m_alignment;
     #m_text = [];
 
-    constructor(type, priority, alignment, template = null) {
+    constructor(template=null, type='defualt', priority=3, alignment='left') {
         this.#m_type = type;
         this.#m_priority = priority;
         this.#m_alignment = alignment;
 
         if(template != null) {
-            for(const textObject in template) {
-                this.AddText(this.#m_text.length, textObject);
+            for(let textIndex = 0; textIndex < template.length; textIndex++) {
+                this.AddText(this.#m_text.length, template[textIndex]);
             }
         }
     }
@@ -116,11 +116,7 @@ class Block {
         return isEmpty;
     }
 
-    IsDirty() {
-        return this.#m_isDirty;
-    }
-
-    AddText(number, textObject = new Text()) {
+    AddText(number, textObject = new Words()) {
         this.#m_isDirty = true;
         this.#m_text.splice(number, 0, textObject); //TODO: +1?
 
@@ -137,8 +133,8 @@ class Block {
     GetText() {
         let text = '';
 
-        for(const textObject in m_text) {
-            text += textObject.GetText();
+        for(let textIndex = 0; textIndex < this.#m_text.length; textIndex++) {
+            text += this.#m_text[textIndex].GetText();
         }
 
         return text;
@@ -267,7 +263,7 @@ class Page {
     }
 }
 
-class Document {
+class Doc {
     #m_name;
     #m_isDirty = true;
     #m_description = "";
@@ -284,7 +280,7 @@ class Document {
 
     AddPage(number, page = new Page()) {
         this.#m_isDirty = true;
-        this.#m_pages.splice(number, 0, page); //TODO: +1?
+        this.#m_pages.push(page); //TODO: +1?
 
         return page;
     }
@@ -319,12 +315,20 @@ class Document {
 
     GetText() {
         let text = "";
-
-        for(const page in this.#m_pages) {
-            for(const block in page.GetBlocks()) {
-                text += block.GetText();
+        console.log(this.#m_pages[0]);
+        //console.log(this.#m_pages.length);
+        for (let i = 0; i < this.#m_pages.length; i++){
+            blocks = this.#m_pages[i].GetBlocks();
+            for (let j = 0; j < blocks.length; j++){
+                text += blocks[j].GetText();
             }
         }
+        // for(const page in this.#m_pages) {
+        //     blocks = page.GetBlocks();
+        //     for(const block in blocks) {
+        //         text += block.GetText();
+        //     }
+        // }
 
         return text;
     }
