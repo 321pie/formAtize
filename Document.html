@@ -15,6 +15,7 @@
     </div>
 
     <div id="pages">
+        <!--TODO: Place <div contenteditable="true"/> in pages in here, then iterate through children for Words()-->
     </div>
 
     <div id="editing_menus">
@@ -85,8 +86,9 @@
         /*
         *Save the document
         */
-        function handleSaveDocumentClick() {
-            //Load text into Document class
+        function handleSaveDocumentClick(save = true) {
+            //Load text into Doc class
+            DOCUMENT = new Doc();
             let pages = document.getElementsByClassName('page');
             for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
                 let curPage = new Page();
@@ -99,21 +101,18 @@
                 DOCUMENT.AddPage(DOCUMENT.GetPageCount(), curPage);
             }
 
-            //TODO: delete
-            console.log(DOCUMENT.GetText());
-            console.log(DOCUMENT.ToJSON());
-            console.log(DOCUMENT);
-
-            //Send Document class
-            const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
-            fetch(url, {
-                'method': 'PATCH',
-                'headers': new Headers({
-                    'Authorization': 'Bearer ' + gapi.auth.getToken().access_token, //TODO: Code works, but access token doesn't?
-                    'Content-type': 'text/plain'
-                }),
-                'body': `${DOCUMENT.ToJSON()}`
-            }).then(alert('File saved.'));
+            if(save) {
+                //Send Document class
+                const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
+                fetch(url, {
+                    'method': 'PATCH',
+                    'headers': new Headers({
+                        'Authorization': 'Bearer ' + gapi.auth.getToken().access_token, //TODO: Code works, but access token doesn't?
+                        'Content-type': 'text/plain'
+                    }),
+                    'body': `${DOCUMENT.ToJSON()}`
+                }).then(alert('File saved.'));
+            }
         }
 
         let slideUp = (target, duration=500) => {
@@ -216,41 +215,35 @@
             }
         }
 
+        function handleCleanClick() {
+            DOCUMENT.Clean();
+
+            document.getElementById("pages").innerHTML = '';
+            loadText();
+        }
+
         function handleDisplayMenuClick() {
             let target = document.getElementById('pages');
             let menu = document.getElementById("selected_menu");
 
             //if (window.getComputedStyle(target).display === 'none') {
             if(menu.innerHTML !== '') {
-                //TODO: Clear div
+                //Clear div
                 menu.innerHTML = '';
                 menu.style.visibility = 'hidden';
 
                 //return slideDown(target);
             }
             else {
-                //TODO: Populate div
+                //Populate div
+                handleSaveDocumentClick(false); //Syncs DOCUMENT to actual data
+                let wordCount = DOCUMENT.WordCount();
                 menu.innerHTML = `
-                <div id="word_count">Word Count: ${'Put word count here!'}</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
-                <div>There's text here!</div>
+                <div id="word_count">Word Count: ${wordCount[0]}</div>
+                <div id="average_word_count">Word Count: ${wordCount[1]}</div>
+                <div id="clean"><button id="clean_button" onclick="handleCleanClick()">Clean Document</button></div>
+                <div>Dropdown to select blocks of a certain type or all blocks</div>
+                <div>List of blocks</div>
                 `;
                 menu.style.visibility = 'visible';
 

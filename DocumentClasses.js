@@ -175,14 +175,25 @@ class Block {
         return count;
     }
 
-    WordCount() {
+    WordCount(trueAverage = true) {
         let count = 0;
+        let average = 0;
+        let textArray;
 
-        for(const textObject in this.m_text) {
-            count += textObject.GetText().split(" ").length;
+        for(let textIndex=0; textIndex < this.#m_text.length; textIndex++) {
+            textArray = this.#m_text[textIndex].GetText().split(" ");
+            count += textArray.length;
+
+            for(let wordIndex=0; wordIndex < textArray.length; wordIndex++) {
+                average += textArray[wordIndex].length;
+            }
         }
 
-        return count;
+        if(trueAverage) {
+            average /= count;
+        }
+
+        return [count, average];
     }
 
     GetType() {
@@ -456,24 +467,27 @@ class Doc {
         return hierarchy;
     }
 
-    WordCount(limitedMode, types = null) {
+    WordCount() {
         let count = 0;
+        let average = 0;
 
-        if(limitedMode == false) {
-            //Add types checking
+        let tempCount = 0;
+        let tempAverage = 0;
 
-            for(const page in this.#m_pages) {
-                for(const block in page.GetBlocks()) {
-                    count += block.WordCount(false);
-                }
+        let myBlocks;
+
+        for(let pageIndex=0; pageIndex < this.GetPageCount(); pageIndex++) {
+            myBlocks = this.#m_pages[pageIndex].GetBlocks();
+            for(let blockIndex=0; blockIndex < myBlocks.length; blockIndex++) {
+                [tempCount, tempAverage] = myBlocks[blockIndex].WordCount(false);
+                count += tempCount;
+                average += tempAverage
             }
         }
-        else {
-            //Add in later
-            return -1;
-        }
 
-        return count;
+        average /= count;
+
+        return [count, average];
     }
 
     GetBlocks() {
