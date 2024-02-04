@@ -15,9 +15,6 @@
     </div>
 
     <div id="pages">
-        <div class="page">
-            <textarea class="block" id="block1"></textarea>
-        </div>
     </div>
 
     <div id="editing_menus">
@@ -58,11 +55,19 @@
             DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
 
             //TODO: Create pages/blocks based on DOCUMENT
-            pages = DOCUMENT.GetPages();
+            let pages = DOCUMENT.GetPages();
+            let blocks;
+            let HTMLText = '';
             for(pageIndex=0; pageIndex < pages.length; pageIndex++) {
-
+                HTMLText = '';
+                blocks = pages[pageIndex].GetBlocks();
+                for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    //TODO: Add css based on text blocks
+                    HTMLText += `<textarea class="block">${blocks[blockIndex].GetText()}</textarea>`;
+                }
+                HTMLText = '<div class="page">' + HTMLText + '</div>';
+                document.getElementById('pages').innerHTML += HTMLText;
             }
-            document.getElementById("block1").value = DOCUMENT.GetText();
         }
 
         //Load document
