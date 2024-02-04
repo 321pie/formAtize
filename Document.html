@@ -55,7 +55,21 @@
             'responseType': 'arraybuffer',
             });
 
-            document.getElementById("block1").value = JSON.parse(JSON.stringify(res, null, 4)).body;
+            jsonObject = JSON.parse(JSON.stringify(res));
+            //DOCUMENT = Object.assign(new Doc(), jsonObject.result);
+            
+            //console.log(jsonObject);
+            console.log(jsonObject.result);
+            DOCUMENT.FromJSON(jsonObject.result);
+            console.log(DOCUMENT);
+            //console.log(DOCUMENT.ToJSON());
+            console.log(DOCUMENT.GetName());
+            console.log(DOCUMENT.GetText());
+            //alert(JSON.parse(res));
+            //DOCUMENT = JSON.parse(res);
+            document.getElementById("block1").value = DOCUMENT.GetText();
+
+            //document.getElementById("block1").value = JSON.parse(JSON.stringify(res, null, 4)).body;
         }
 
         //Load document
