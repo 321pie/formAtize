@@ -226,12 +226,12 @@ class Block {
 
     FromJSON(json) {
         let myWords = [];
-        console.log(json);
+        let temp;
+
         for(let text in json.m_text) {
-            console.log(json.m_text[text]);
-            var temp = new Words();
+            temp = new Words();
             temp.FromJSON(json.m_text[text]);
-            myWords.push([temp]);
+            myWords.push(temp);
         }
 
         this.#m_isDirty = json.m_isDirty;
@@ -338,12 +338,10 @@ class Page {
 
     FromJSON(json) {
         let myBlocks = [];
-        console.log(json);
         for(let myBlock in json.m_blocks) {
-            console.log(json.m_blocks[myBlock]);
             var temp = new Block();
             temp.FromJSON(json.m_blocks[myBlock]);
-            myBlocks.push([temp]);
+            myBlocks.push(temp);
         }
 
         this.#m_blocks = myBlocks;
@@ -405,6 +403,7 @@ class Doc {
 
     GetText() {
         let text = "";
+        let blocks;
 
         for (let pageIndex = 0; pageIndex < this.#m_pages.length; pageIndex++){
             blocks = this.#m_pages[pageIndex].GetBlocks();
@@ -530,17 +529,19 @@ class Doc {
 
     FromJSON(json) {
         let myPages = [];
+        let temp;
+
         for(let myPage in json.m_pages) {
-            var temp = new Page();
+            temp = new Page();
             temp.FromJSON(json.m_pages[myPage]);
-            myPages.push([temp]);
+            myPages.push(temp);
         }
 
         let myBlocks = [];
         for(let myBlock in json.m_blocks) {
-            var temp = new Block();
+            temp = new Block();
             temp.FromJSON(json.m_blocks[myBlock]);
-            myWords.push([temp]);
+            myWords.push(temp);
         }
 
         this.#m_name = json.m_name;

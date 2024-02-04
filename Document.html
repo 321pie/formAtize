@@ -55,21 +55,14 @@
             'responseType': 'arraybuffer',
             });
 
-            jsonObject = JSON.parse(JSON.stringify(res));
-            //DOCUMENT = Object.assign(new Doc(), jsonObject.result);
-            
-            //console.log(jsonObject);
-            console.log(jsonObject.result);
-            DOCUMENT.FromJSON(jsonObject.result);
-            console.log(DOCUMENT);
-            //console.log(DOCUMENT.ToJSON());
-            console.log(DOCUMENT.GetName());
-            console.log(DOCUMENT.GetText());
-            //alert(JSON.parse(res));
-            //DOCUMENT = JSON.parse(res);
-            document.getElementById("block1").value = DOCUMENT.GetText();
+            DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
 
-            //document.getElementById("block1").value = JSON.parse(JSON.stringify(res, null, 4)).body;
+            //TODO: Create pages/blocks based on DOCUMENT
+            pages = DOCUMENT.GetPages();
+            for(pageIndex=0; pageIndex < pages.length; pageIndex++) {
+
+            }
+            document.getElementById("block1").value = DOCUMENT.GetText();
         }
 
         //Load document
@@ -92,11 +85,9 @@
             let pages = document.getElementsByClassName('page');
             for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
                 let curPage = new Page();
-                console.log('In page'); //TODO: delete
                 blocks = pages.item(pageIndex).getElementsByClassName('block');
 
                 for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-                    console.log('In block'); //TODO: delete
                     curPage.AddBlock(blocks.length, new Block([new Words(blocks.item(blockIndex).value)]));
                 }
 
