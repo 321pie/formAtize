@@ -129,7 +129,7 @@ class Block {
 
     //Returns if anything is contined within or if it can be deleted upon save.
     IsEmpty() {
-        isEmpty = true;
+        let isEmpty = true;
 
         for(const textObject in this.#m_text) {
             if(textObject.IsEmpty() == false) {
@@ -169,7 +169,7 @@ class Block {
         this.#m_isDirty = true; //Could check if count > 0, but if run concurrently, then there're problems
 
         let count = this.#m_text.length;
-        this.#m_text = this.#m_text.filter(textObject => textObject.isEmpty() == true);
+        this.#m_text = this.#m_text.filter(textObject => textObject.IsEmpty() == true);
         count -= this.#m_text.length;
 
         return count;
@@ -286,7 +286,7 @@ class Page {
         this.#m_isDirty = true; //Could check if count > 0, but if run concurrently, then there're problems
 
         let count = this.#m_blocks.length;
-        this.#m_blocks = this.#m_blocks.filter(block => block.isEmpty() == true);
+        this.#m_blocks = this.#m_blocks.filter(block => block.IsEmpty() == true);
         count -= this.#m_blocks.length;
 
         return count;
@@ -294,7 +294,7 @@ class Page {
 
     //Returns if anything is contined within or if it can be deleted upon save.
     IsEmpty() {
-        isEmpty = true;
+        let isEmpty = true;
 
         for(const block in this.#m_blocks) {
             if(block.IsEmpty() == false) {
@@ -397,7 +397,7 @@ class Doc {
 
     //TODO: Call clean and then have IsEmpty() { return this.m_pages.length == 0 }
     IsEmpty() {
-        isEmpty = true;
+        let isEmpty = true;
 
         for(const page in this.#m_pages) {
             if(page.IsEmpty() == false) {
@@ -430,10 +430,14 @@ class Doc {
         this.#m_isDirty = true; //Could check if count > 0, but if run concurrently, then there're problems
 
         let count = this.#m_pages.length;
-        this.#m_pages = this.#m_pages.filter(page => page.isEmpty() == true);
+        this.#m_pages = this.#m_pages.filter(page => page.IsEmpty() == true);
         count -= this.#m_pages.length;
 
         return count;
+    }
+
+    Clear() {
+        this.#m_pages = [];
     }
 
     //Max of 5 priority levels
@@ -476,7 +480,7 @@ class Doc {
 
         let myBlocks;
 
-        for(let pageIndex=0; pageIndex < this.GetPageCount(); pageIndex++) {
+        for(let pageIndex=0; pageIndex < this.#m_pages.length; pageIndex++) {
             myBlocks = this.#m_pages[pageIndex].GetBlocks();
             for(let blockIndex=0; blockIndex < myBlocks.length; blockIndex++) {
                 [tempCount, tempAverage] = myBlocks[blockIndex].WordCount(false);

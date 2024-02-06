@@ -40,7 +40,8 @@
         localStorage.clear();
 
         //Hide selected menu
-        document.getElementById("selected_menu").style.visibility = 'hidden';
+        //document.getElementById("selected_menu").style.visibility = 'hidden';
+        document.getElementById("selected_menu").innerHTML = '';
 
         //Load document text
         async function loadText() {
@@ -86,9 +87,9 @@
         /*
         *Save the document
         */
-        function handleSaveDocumentClick(save = true) {
+        function handleSaveDocumentClick(save=true) {
             //Load text into Doc class
-            DOCUMENT = new Doc();
+            DOCUMENT.Clear();
             let pages = document.getElementsByClassName('page');
             for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
                 let curPage = new Page();
@@ -220,19 +221,20 @@
 
             document.getElementById("pages").innerHTML = '';
             loadText();
+
+            //Close Display menu and reopen for reload of blocks
+            handleDisplayMenuClick();
+            handleDisplayMenuClick();
         }
 
         function handleDisplayMenuClick() {
             let target = document.getElementById('pages');
             let menu = document.getElementById("selected_menu");
 
-            //if (window.getComputedStyle(target).display === 'none') {
-            if(menu.innerHTML !== '') {
+            if(menu.innerHTML != '') {
                 //Clear div
                 menu.innerHTML = '';
                 menu.style.visibility = 'hidden';
-
-                //return slideDown(target);
             }
             else {
                 //Populate div
@@ -240,14 +242,12 @@
                 let wordCount = DOCUMENT.WordCount();
                 menu.innerHTML = `
                 <div id="word_count">Word Count: ${wordCount[0]}</div>
-                <div id="average_word_count">Word Count: ${wordCount[1]}</div>
+                <div id="average_word_count">Average Word Length: ${wordCount[1]}</div>
                 <div id="clean"><button id="clean_button" onclick="handleCleanClick()">Clean Document</button></div>
                 <div>Dropdown to select blocks of a certain type or all blocks</div>
                 <div>List of blocks</div>
                 `;
                 menu.style.visibility = 'visible';
-
-                //return slideUp(target);
             }
         }
     </script>
