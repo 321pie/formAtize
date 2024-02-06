@@ -8,8 +8,14 @@ class Words {
     #m_isItalicized = false;
     #m_isUnderlined = false;
 
-    constructor(text='') {
+    constructor(text='', font='arial', fontSize=12, fontColor='black', isBold=false, isItalicized=false, isUnderlined=false) {
         this.#m_text = text;
+        this.#m_font = font;
+        this.#m_fontSize = fontSize;
+        this.#m_fontColor = fontColor;
+        this.#m_isBold = isBold;
+        this.#m_isItalicized = isItalicized;
+        this.#m_isUnderlined = isUnderlined;
     }
 
     IsEmpty() {

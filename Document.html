@@ -155,11 +155,19 @@
             //Load text into Doc class
             DOCUMENT.Clear();
             let pages = document.getElementsByClassName('page');
+            let blocks;
+            let words;
+
             for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
                 let curPage = new Page();
                 blocks = pages.item(pageIndex).getElementsByClassName('block');
 
                 for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+                    words = blocks.item(blockIndex).getElementsByClassName('text');
+                    for(let textIndex = 0; textIndex < words.length; textIndex++) {
+
+                    } //TODO: Get Words() items from blocks and save to page correctly
+
                     curPage.AddBlock(blocks.length, new Block([new Words(blocks.item(blockIndex).value)]));
                 }
 
@@ -172,7 +180,7 @@
                 fetch(url, {
                     'method': 'PATCH',
                     'headers': new Headers({
-                        'Authorization': 'Bearer ' + gapi.auth.getToken().access_token, //TODO: Code works, but access token doesn't?
+                        'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
                         'Content-type': 'text/plain'
                     }),
                     'body': `${DOCUMENT.ToJSON()}`
