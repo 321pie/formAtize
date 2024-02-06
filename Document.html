@@ -15,6 +15,7 @@
     </div>
 
     <div id="pages">
+        <div contenteditable="true"><b><u><i><span style="color: pink; font-size: 24; font-family: Times New Roman">crazy text with all the toppings</span></i></u></b></div>
         <!--TODO: Place <div contenteditable="true"/> in pages in here, then iterate through children for Words()-->
     </div>
 
@@ -43,20 +44,56 @@
         //document.getElementById("selected_menu").style.visibility = 'hidden';
         document.getElementById("selected_menu").innerHTML = '';
 
+        function loadBlock(block) {
+            words = block.GetWords();
+            let HTMLText = '<div contenteditable="true" class="block">'; //Make block
+
+            //Add Words to block
+            for(textIndex=0; textIndex < words.length; textIndex++) {
+                textObject = words[textIndex];
+
+                //Populate block with Words objects
+                if(textObject.GetBold()) {
+                    HTMLText += '<b class="text">';
+                }
+                if(textObject.GetUnderlined()) {
+                    HTMLText += '<u class="text">';
+                }
+                if(textObject.GetItalicized()) {
+                    HTMLText += '<i class="text">';
+                }
+                HTMLText += `<span class="text" style="color: ${textObject.GetFontColor()}; font-size: ${textObject.GetFontSize}; font-family: ${textObject.GetFont()}">${textObject.GetText()}</span>`;
+                if(textObject.GetItalicized()) {
+                    HTMLText += '</i>';
+                }
+                if(textObject.GetUnderlined()) {
+                    HTMLText += '</u>';
+                }
+                if(textObject.GetBold()) {
+                    HTMLText += '</b>';
+                }
+            }
+            HTMLText += '</div>';
+
+            return HTMLText;
+        }
+
         //Load document text
-        async function loadText() {
-            let fileId = JSON.parse(FILE_ID);
+        async function loadText(getRemote=true) {
+            if(getRemote) {
+                let fileId = JSON.parse(FILE_ID);
 
-            let res = await gapi.client.drive.files.get({
-            'fileId': fileId,
-            'alt': 'media',
-            }, {
-            'responseType': 'arraybuffer',
-            });
+                let res = await gapi.client.drive.files.get({
+                'fileId': fileId,
+                'alt': 'media',
+                }, {
+                'responseType': 'arraybuffer',
+                });
 
-            DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
+                DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
+            }
 
-            //TODO: Create pages/blocks based on DOCUMENT
+            //Create pages/blocks based on DOCUMENT
             let pages = DOCUMENT.GetPages();
             let blocks;
             let HTMLText = '';
@@ -64,8 +101,35 @@
                 HTMLText = '';
                 blocks = pages[pageIndex].GetBlocks();
                 for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    //TODO: Add css based on text blocks
-                    HTMLText += `<textarea class="block">${blocks[blockIndex].GetText()}</textarea>`;
+                    HTMLText += loadBlock(blocks[blockIndex]);
+
+                    /*words = blocks[blockIndex].GetWords();
+                    HTMLText += '<div contenteditable="true" class="block">'; //Make block
+                    for(textIndex=0; textIndex < words.length; textIndex++) {
+                        textObject = words[textIndex];
+
+                        //Populate block with Words objects
+                        if(textObject.GetBold()) {
+                            HTMLText += '<b class="text">';
+                        }
+                        if(textObject.GetUnderlined()) {
+                            HTMLText += '<u class="text">';
+                        }
+                        if(textObject.GetItalicized()) {
+                            HTMLText += '<i class="text">';
+                        }
+                        HTMLText += `<span class="text" style="color: ${textObject.GetFontColor()}; font-size: ${textObject.GetFontSize}; font-family: ${textObject.GetFont()}">${textObject.GetText()}</span>`;
+                        if(textObject.GetItalicized()) {
+                            HTMLText += '</i>';
+                        }
+                        if(textObject.GetUnderlined()) {
+                            HTMLText += '</u>';
+                        }
+                        if(textObject.GetBold()) {
+                            HTMLText += '</b>';
+                        }
+                    }
+                    HTMLText += '</div>';*/
                 }
                 HTMLText = '<div class="page">' + HTMLText + '</div>';
                 document.getElementById('pages').innerHTML += HTMLText;
@@ -182,21 +246,60 @@
             }
         }
 
-        function handleBlockMenuClick() {
-            let target = document.getElementById('pages');
+        function handleAddBlockClick() {
+            //Save new block to DOCUMENT
+            DOCUMENT.AddBlock(new Block(null, document.getElementById("block_type").value, document.getElementById("block_priority").value, document.getElementById("block_alignment").value));
 
-            if (window.getComputedStyle(target).display === 'none') {
-                //TODO: Clear div
-                document.getElementById("selected_menu").style.visibility = 'hidden';
+            //Reset and call handleBlockMenuClick()
+            document.getElementById("selected_menu").innerHTML = '';
+            handleBlockMenuClick();
+        }
 
-                return slideDown(target);
-            }
-            else {
-                //TODO: Populate div
-                document.getElementById("selected_menu").style.visibility = 'visible';
+        function handleCreateBlockTemplateClick() {
+            //Populate menu to create new block
+            document.getElementById("selected_menu").innerHTML = `
+            <div>Please enter a block name: <textarea id="block_type" style="height: 10px; width: 30px;"></textarea></div>
+            <div>
+                <select name="priority" id="block_priority">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                </select>
+            </div>
+            <div id="block_alignment">
+                <select name="priority" id="block_priority">
+                    <option value="left">left</option>
+                    <option value="center">center</option>
+                    <option value="right">right</option>
+                </select>
+            </div>
+            <div id="submit"><button id="submit_button" onclick="handleAddBlockClick()">Submit</button></div>`;
+        }
 
-                return slideUp(target);
-            }
+        function handleCreateBlockClick(block) {
+            //Append block to end of last page
+            //TODO: Allow for blocks to be added anywhere
+            let HTMLText = loadBlock(block);
+            let pages = document.getElementsByClassName('page'); //Load pages
+
+            pages[pages.length - 1].innerHTML += HTMLText; //Load block into end of last page
+        }
+
+        function handleCleanClick() {
+            DOCUMENT.Clean();
+
+            document.getElementById("pages").innerHTML = '';
+            loadText();
+
+            //Close Display menu and reopen for reload of blocks
+            handleDisplayMenuClick();
+            handleDisplayMenuClick();
         }
 
         function handleEditMenuClick() {
@@ -216,19 +319,33 @@
             }
         }
 
-        function handleCleanClick() {
-            DOCUMENT.Clean();
+        function handleBlockMenuClick() {
+            let menu = document.getElementById("selected_menu");
 
-            document.getElementById("pages").innerHTML = '';
-            loadText();
+            if(menu.innerHTML != '') {
+                //Clear div
+                menu.innerHTML = '';
+                menu.style.visibility = 'hidden';
+            }
+            else {
+                //Populate div
+                handleSaveDocumentClick(false); //Syncs DOCUMENT to actual data
 
-            //Close Display menu and reopen for reload of blocks
-            handleDisplayMenuClick();
-            handleDisplayMenuClick();
+                menu.innerHTML = `
+                <div class="grid-container">
+                    <div class="grid-item"><button id="create_block_template" onclick="handleCreateBlockTemplateClick()">Create New Block Template</button></div>`;
+
+                let blocks = DOCUMENT.GetBlocks()
+                for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    menu.innerHTML += `<div class="grid-item"><button onclick="handleCreateBlockClick(${blocks[blockIndex]})">Create ${blocks[blockIndex].GetType()} Block</button></div>`
+                }
+
+                menu.innerHTML += '</div>';
+                menu.style.visibility = 'visible';
+            }
         }
 
         function handleDisplayMenuClick() {
-            let target = document.getElementById('pages');
             let menu = document.getElementById("selected_menu");
 
             if(menu.innerHTML != '') {

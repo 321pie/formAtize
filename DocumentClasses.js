@@ -164,6 +164,10 @@ class Block {
         return text;
     }
 
+    GetWords() {
+        return this.#m_text;
+    }
+
     //Removes all empty text objects from the block and returns the number of deleted text objects.
     Clean() {
         this.#m_isDirty = true; //Could check if count > 0, but if run concurrently, then there're problems

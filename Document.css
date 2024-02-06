@@ -63,7 +63,7 @@ div#pages{
     min-width: 100%;
 }
 
-textarea{
+div#pages div div{
     min-height: max-content;
     max-height: 130vw;
     min-width: 100%;
