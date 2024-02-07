@@ -137,8 +137,8 @@ class Block {
     IsEmpty() {
         let isEmpty = true;
 
-        for(const textObject in this.#m_text) {
-            if(textObject.IsEmpty() == false) {
+        for (let textIndex = 0; textIndex < this.#m_text.length; textIndex++){
+            if(this.#m_text[textIndex].IsEmpty() == false) {
                 isEmpty = false;
             }
         }
@@ -306,8 +306,8 @@ class Page {
     IsEmpty() {
         let isEmpty = true;
 
-        for(const block in this.#m_blocks) {
-            if(block.IsEmpty() == false) {
+        for (let blockIndex = 0; blockIndex < this.#m_blocks.length; blockIndex++){
+            if(this.#m_blocks[blockIndex].IsEmpty() == false) {
                 isEmpty = false;
             }
         }
@@ -508,9 +508,9 @@ class Doc {
         return this.#m_blocks;
     }
 
-    AddBlocks(block) {
+    AddBlock(block) {
         this.#m_isDirty = true;
-        this.#m_blocks.Append(block);
+        this.#m_blocks.push(block);
     }
 
     GetName() {
@@ -566,6 +566,7 @@ class Doc {
         }
 
         let myBlocks = [];
+        let myWords = [];
         for(let myBlock in json.m_blocks) {
             temp = new Block();
             temp.FromJSON(json.m_blocks[myBlock]);
