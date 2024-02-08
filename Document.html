@@ -42,37 +42,8 @@
         document.getElementById("selected_menu").innerHTML = '';
 
         function loadBlock(block) {
-            words = block.GetWords();
-            let HTMLText = '<div contenteditable="true" class="block">'; //Make block
-
-            /*//Add Words to block
-            for(textIndex=0; textIndex < words.length; textIndex++) {
-                textObject = words[textIndex];
-
-                //Populate block with Words objects
-                if(textObject.GetBold()) {
-                    HTMLText += '<b class="text">';
-                }
-                if(textObject.GetUnderlined()) {
-                    HTMLText += '<u class="text">';
-                }
-                if(textObject.GetItalicized()) {
-                    HTMLText += '<i class="text">';
-                }
-                HTMLText += `<span class="text" style="color: ${textObject.GetFontColor()}; font-size: ${textObject.GetFontSize}; font-family: ${textObject.GetFont()}">${textObject.GetText()}</span>`;
-                if(textObject.GetItalicized()) {
-                    HTMLText += '</i>';
-                }
-                if(textObject.GetUnderlined()) {
-                    HTMLText += '</u>';
-                }
-                if(textObject.GetBold()) {
-                    HTMLText += '</b>';
-                }
-            }
-            HTMLText += '</div>';*/
-
-            HTMLText += `${block.GetText()}</div>`;
+            //words = block.GetWords();
+            let HTMLText = `<div contenteditable="true" class="block">${block.GetText()}</div>`;
 
             return HTMLText;
         }
@@ -89,16 +60,7 @@
                 'responseType': 'arraybuffer',
                 });
 
-                // let bigString = '';
-                // let stringArray = JSON.stringify(res).split('\\');
-                // for(let stringIndex=0; stringIndex < stringArray.length; stringIndex++) {
-                //     bigString += stringArray[stringIndex];
-                // }
-
-                // console.log(bigString);
                 DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
-                console.log(JSON.parse(JSON.stringify(res)).result);
-                console.log(DOCUMENT);
             }
 
             //Create pages/blocks based on DOCUMENT
@@ -128,27 +90,44 @@
             window.location.reload();
         }
 
+        function addPage() {
+            let pageDiv = document.createElement("div");
+            let menu = document.getElementById('pages');
+
+            pageDiv.setAttribute("class", "page");
+
+            menu.appendChild(pageDiv);
+            DOCUMENT.AddPage();
+        }
+
         /*
         *Save the document
         */
         function handleSaveDocumentClick(save=true) {
             //Load text into Doc class
-            DOCUMENT.Clear();
-            let pages = document.getElementsByClassName('page');
+            let pages = DOCUMENT.GetPages();
+            let docBlocks = [];
             let blocks;
-            let words;
+            let block;
+
+            for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
+                blocks = pages[pageIndex].GetBlocks();
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    docBlocks.push(blocks[blockIndex]);
+                }
+            }
+            DOCUMENT.Clear();
+
+            pages = document.getElementsByClassName('page');
 
             for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
                 let curPage = new Page();
                 blocks = pages.item(pageIndex).getElementsByClassName('block');
 
                 for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-                    words = blocks.item(blockIndex).getElementsByClassName('text');
-                    for(let textIndex = 0; textIndex < words.length; textIndex++) {
-
-                    } //TODO: Get Words() items from blocks and save to page correctly
-
-                    curPage.AddBlock(blocks.length, new Block([new Words(blocks.item(blockIndex).value)]));
+                    block = docBlocks[blockIndex];
+                    block.SetText(blocks[blockIndex].innerText);
+                    curPage.AddBlock(blocks.length, block);
                 }
 
                 DOCUMENT.AddPage(DOCUMENT.GetPageCount(), curPage);
@@ -168,75 +147,10 @@
             }
         }
 
-        let slideUp = (target, duration=500) => {
-            target.style.transitionProperty = 'height, margin, padding';
-            target.style.transitionDuration = duration + 'ms';
-            target.style.boxSizing = 'border-box';
-            target.style.height = target.offsetHeight + 'px';
-            target.offsetHeight;
-            target.style.overflow = 'hidden';
-            target.style.height = 0;
-            target.style.paddingTop = 0;
-            target.style.paddingBottom = 0;
-            target.style.marginTop = 0;
-            target.style.marginBottom = 0;
-            window.setTimeout( () => {
-                target.style.display = 'none';
-                target.style.removeProperty('height');
-                target.style.removeProperty('padding-top');
-                target.style.removeProperty('padding-bottom');
-                target.style.removeProperty('margin-top');
-                target.style.removeProperty('margin-bottom');
-                target.style.removeProperty('overflow');
-                target.style.removeProperty('transition-duration');
-                target.style.removeProperty('transition-property');
-                //alert("!");
-            }, duration);
-        }
-
-        let slideDown = (target, duration=500) => {
-            target.style.removeProperty('display');
-            let display = window.getComputedStyle(target).display;
-
-            if (display === 'none')
-                display = 'block';
-
-            target.style.display = display;
-            let height = target.offsetHeight;
-            target.style.overflow = 'hidden';
-            target.style.height = 0;
-            target.style.paddingTop = 0;
-            target.style.paddingBottom = 0;
-            target.style.marginTop = 0;
-            target.style.marginBottom = 0;
-            target.offsetHeight;
-            target.style.boxSizing = 'border-box';
-            target.style.transitionProperty = "height, margin, padding";
-            target.style.transitionDuration = duration + 'ms';
-            target.style.height = height + 'px';
-            target.style.removeProperty('padding-top');
-            target.style.removeProperty('padding-bottom');
-            target.style.removeProperty('margin-top');
-            target.style.removeProperty('margin-bottom');
-            window.setTimeout( () => {
-                target.style.removeProperty('height');
-                target.style.removeProperty('overflow');
-                target.style.removeProperty('transition-duration');
-                target.style.removeProperty('transition-property');
-            }, duration);
-        }
-
-        let slideToggle = (target, duration = 500) => {
-            if (window.getComputedStyle(target).display === 'none') {
-                return slideDown(target, duration);
-            } else {
-                return slideUp(target, duration);
-            }
-        }
-
-        function handleAddBlockClick() {
+        function handleAddBlockTemplateClick() {
             //Save new block to DOCUMENT
-            DOCUMENT.AddBlock(new Block(null, document.getElementById("block_type").value, document.getElementById("block_priority").value, document.getElementById("block_alignment").value));
+            //TODO: Check for unique names somewhere
+            DOCUMENT.AddBlock(new Block('', document.getElementById("block_type").value, document.getElementById("block_priority").value, document.getElementById("block_alignment").value));
 
             //Reset and call handleBlockMenuClick()
             document.getElementById("selected_menu").innerHTML = '';
@@ -272,17 +186,35 @@
                     <option value="right">right</option>
                 </select>
             </div>
-            <div id="submit"><button id="submit_button" onclick="handleAddBlockClick()">Submit</button></div>`;
+            <div id="submit"><button id="submit_button" onclick="handleAddBlockTemplateClick()">Submit</button></div>`;
         }
 
         function handleCreateBlockClick(block) {
             //Append block to end of last page
             //TODO: Allow for blocks to be added anywhere
-            block = new Block().FromJSON(block);
+            console.log('In click Function!');
+            let argJSON = block.getAttribute('data-arg1');
+            argJSON = argJSON.replaceAll("'", '"');
+            console.log(argJSON);
+            console.log(JSON.parse(argJSON));
+            console.log('Adding block');
+            console.log(new Block().FromJSON(JSON.parse(argJSON)));
+            block = new Block();
+            block.FromJSON(JSON.parse(argJSON));
+            //console.log(new Block().FromJSON(JSON.parse(block)));
             let HTMLText = loadBlock(block);
             let pages = document.getElementsByClassName('page'); //Load pages
 
+            console.log(pages);
+            if(pages.length == 0) {
+                addPage();
+                pages = document.getElementsByClassName('page'); //Load pages
+            }
+
+            console.log('Adding to page and document');
             pages[pages.length - 1].innerHTML += HTMLText; //Load block into end of last page
+            DOCUMENT.AddBlockToPage(block);
+            console.log(DOCUMENT);
         }
 
         function handleCleanClick() {
@@ -297,7 +229,7 @@
         }
 
         function handleEditMenuClick() {
-            let target = document.getElementById('pages');
+            /*let target = document.getElementById('pages');
 
             if (window.getComputedStyle(target).display === 'none') {
                 //TODO: Clear div
@@ -310,7 +242,7 @@
                 document.getElementById("selected_menu").style.visibility = 'visible';
 
                 return slideUp(target);
-            }
+            }*/
         }
 
         function handleBlockMenuClick() {
@@ -331,13 +263,26 @@
 
                 let blocks = DOCUMENT.GetBlocks();
                 for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    menu.innerHTML += `<div class="grid-item"><button onclick="handleCreateBlockClick(${String(blocks[blockIndex].ToJSON())})">Create ${blocks[blockIndex].GetType()} Block</button></div>`
+                    let blockDiv = document.createElement("div");
+                    blockDiv.setAttribute("class", "grid-item");
+                    blockDiv.innerHTML=`<button data-arg1="${JSON.stringify(blocks[blockIndex].ToJSON()).replaceAll('"', "'")}" onClick="handleCreateBlockClick(this)">Create ${blocks[blockIndex].GetType()} Block</button>`;
+
+                    //let passBlock = blocks[blockIndex];
+                    //handleCreateBlockClick(passBlock);
+                    /*blockDiv.firstChild.addEventListener('click', function(this) {
+                        console.log('In click Function!');
+                        let argJSON = this.getAttribute('data-arg1');
+                        console.log(argJSON);
+                        handleCreateBlockClick(new Block().FromJSON(argJSON));
+                    });*/
+
+                    console.log('Adding child');
+                    menu.appendChild(blockDiv);
+                    //menu.innerHTML += `<div id="${blocks[blockIndex].GetType()}" class="grid-item"><button onclick="handleCreateBlockClick(${blocks[blockIndex].GetType()})">Create ${blocks[blockIndex].GetType()} Block</button></div>`
                 }
 
-                menu.innerHTML += '</div>';
+                //menu.innerHTML += '</div>';
                 menu.style.visibility = 'visible';
-
-                console.log(DOCUMENT);
             }
         }
 

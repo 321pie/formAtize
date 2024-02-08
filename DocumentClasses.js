@@ -1,144 +1,24 @@
-class Words {
-    #m_text;
-    #m_isDirty = true;
-    #m_font = "arial";
-    #m_fontSize = 12;
-    #m_fontColor = "black";
-    #m_isBold = false;
-    #m_isItalicized = false;
-    #m_isUnderlined = false;
-
-    constructor(text='', font='arial', fontSize=12, fontColor='black', isBold=false, isItalicized=false, isUnderlined=false) {
-        this.#m_text = text;
-        this.#m_font = font;
-        this.#m_fontSize = fontSize;
-        this.#m_fontColor = fontColor;
-        this.#m_isBold = isBold;
-        this.#m_isItalicized = isItalicized;
-        this.#m_isUnderlined = isUnderlined;
-    }
-
-    IsEmpty() {
-        return this.#m_text.length == 0;
-    }
-
-    IsDirty() {
-        return this.#m_isDirty;
-    }
-
-    GetText() {
-        return this.#m_text;
-    }
-
-    ChangeText(text) {
-        this.#m_isDirty = true;
-        this.#m_text = text;
-    }
-
-    GetFont() {
-        return this.#m_font;
-    }
-
-    SetFont(font) {
-        this.#m_isDirty = true;
-        this.#m_font = font;
-    }
-
-    GetFontSize() {
-        return this.#m_fontSize;
-    }
-
-    SetFontSize(fontSize) {
-        this.#m_isDirty = true;
-        this.#m_fontSize = fontSize;
-    }
-
-    GetFontColor() {
-        return this.#m_fontColor;
-    }
-
-    SetFont(fontColor) {
-        this.#m_isDirty = true;
-        this.#m_fontColor = fontColor;
-    }
-
-    GetBold() {
-        return this.#m_isBold;
-    }
-
-    SetBold(isBold) {
-        this.#m_isDirty = true;
-        this.#m_isBold = isBold;
-    }
-
-    GetItalicized() {
-        return this.#m_isItalicized;
-    }
-
-    SetItalicized(isItalicized) {
-        this.#m_isDirty = true;
-        this.#m_isItalicized = isItalicized;
-    }
-
-    GetUnderlined() {
-        return this.#m_isUnderlined;
-    }
-
-    SetUnderlined(isUnderlined) {
-        this.#m_isDirty = true;
-        this.#m_isUnderlined = isUnderlined;
-    }
-
-    ToJSON(){
-        return {
-            m_text: this.#m_text,
-            m_isDirty: this.#m_isDirty,
-            m_font: this.#m_font,
-            m_fontSize: this.#m_fontSize,
-            m_fontColor: this.#m_fontColor,
-            m_isBold: this.#m_isBold,
-            m_isItalicized: this.#m_isItalicized,
-            m_isUnderlined: this.#m_isUnderlined
-        }
-    }
-
-    FromJSON(json) {
-        this.#m_text = json.m_text;
-        this.#m_isDirty = json.m_isDirty;
-        this.#m_font = json.m_font;
-        this.#m_fontSize = json.m_fontSize;
-        this.#m_fontColor = json.m_fontColor;
-        this.#m_isBold = json.m_isBold;
-        this.#m_isItalicized = json.m_isItalicized;
-        this.#m_isUnderlined = json.m_isUnderlined;
-    }
-}
-
 class Block {
     #m_isDirty = true;
     #m_type = "default";
     #m_priority = 3;
     #m_alignment = "left";
+    #m_header = false;
+    #m_footer = false;
     #m_text = '';
 
-    constructor(text='', type='default', priority=3, alignment='left') {
+    constructor(text='', type='default', priority=3, alignment='left', header=false, footer=false) {
         this.#m_type = type;
         this.#m_priority = priority;
         this.#m_alignment = alignment;
         this.#m_text = text;
+        this.#m_header = header;
+        this.#m_footer = footer;
     }
 
     //Returns if anything is contined within or if it can be deleted upon save.
     IsEmpty() {
-        let isEmpty = true;
-
-        for (let textIndex = 0; textIndex < this.#m_text.length; textIndex++){
-            if(this.#m_text[textIndex].IsEmpty() == false) {
-                isEmpty = false;
-            }
-        }
-        
-        return isEmpty;
+        return this.#m_text.length == 0;
     }
 
     SetText(text) {
@@ -148,30 +28,37 @@ class Block {
         return this.#m_text;
     }
 
-    RemoveText(number) {
-        this.#m_isDirty = true;
-        this.#m_text.splice(number, 1); //TODO: +1?
-
-        return this.#m_text.length;
-    }
-
     GetText() {
         return this.#m_text;
     }
 
-    GetWords() {
-        return this.#m_text;
+    GetHeader() {
+        return this.#m_header;
+    }
+
+    SetHeader(header) {
+        this.#m_isDirty = true;
+        this.#m_header = header;
+    }
+
+    GetFooter() {
+        return this.#m_footer;
+    }
+
+    SetFooter(footer) {
+        this.#m_isDirty = true;
+        this.#m_footer = footer;
     }
 
     //Removes all empty text objects from the block and returns the number of deleted text objects.
     Clean() {
-        return this.#m_text.length == 0
+        return this.#m_text.length == 0;
     }
 
     WordCount(trueAverage = true) {
         let count = 0;
         let average = 0;
-        let textArray = this.#m_text.GetText().split(" ");
+        let textArray = this.#m_text.split(" ");
         
         count += textArray.length;
 
@@ -214,24 +101,27 @@ class Block {
             m_type: this.#m_type,
             m_priority: this.#m_priority,
             m_alignment: this.#m_alignment,
-            m_text: this.#m_text
+            m_text: this.#m_text,
+            m_header: this.#m_header,
+            m_footer: this.#m_footer
         }
     }
 
     FromJSON(json) {
+        console.log(json);
         this.#m_isDirty = json.m_isDirty;
         this.#m_type = json.m_type;
         this.#m_priority = json.m_priority;
         this.#m_alignment = json.m_priority;
         this.#m_text = json.m_text;
+        this.#m_header = json.m_header;
+        this.#m_footer = json.m_footer;
     }
 }
 
 class Page {
     #m_blocks = [];
     #m_isDirty = true;
-    #m_header = "";
-    #m_footer = "";
 
     constructor() {}
 
@@ -287,52 +177,36 @@ class Page {
         return this.#m_blocks;
     }
 
-    GetHeader() {
-        return this.#m_header;
-    }
-
-    SetHeader(header) {
-        this.#m_isDirty = true;
-        this.#m_header = header;
-    }
-
-    GetFooter() {
-        return this.#m_footer;
-    }
-
-    SetFooter(footer) {
-        this.#m_isDirty = true;
-        this.#m_footer = footer;
-    }
-
     ToJSON(){
         let myBlocks = {};
         let block;
         for (let blockIndex = 0; blockIndex < this.#m_blocks.length; blockIndex++){
             block = this.#m_blocks[blockIndex].ToJSON();
-            myBlocks = {...myBlocks, block};
+            myBlocks["block"+blockIndex] = block;
         }
 
         return {
             m_blocks: myBlocks,
-            m_isDirty: this.#m_isDirty,
-            m_header: this.#m_header,
-            m_footer: this.#m_footer
+            m_isDirty: this.#m_isDirty
         }
     }
 
     FromJSON(json) {
         let myBlocks = [];
+        let key;
+        console.log(json);
+
         for(let blockIndex=0; blockIndex < Object.keys(json.m_blocks).length; blockIndex++) {
             var temp = new Block();
-            temp.FromJSON(Object.keys(json.m_blocks)[blockIndex]);
+            key = Object.keys(json.m_blocks)[blockIndex];
+            temp.FromJSON(json.m_blocks[key]);
             myBlocks.push(temp);
         }
 
+        console.log(myBlocks);
+
         this.#m_blocks = myBlocks;
         this.#m_isDirty = json.m_isDirty;
-        this.#m_header = json.m_header;
-        this.#m_footer = json.m_footer;
     }
 }
 
@@ -398,6 +272,16 @@ class Doc {
         }
 
         return text;
+    }
+
+    AddBlockToPage(block=new Block(), pageNumber=this.#m_pages.length, blockNumber=null) {
+        pageNumber--;
+        if((pageNumber>=0) && (pageNumber<this.#m_pages.length)) {
+            if(blockNumber == null) {
+                blockNumber = this.#m_pages[pageNumber].GetBlockCount();
+            }
+            this.#m_pages[pageNumber].AddBlock(blockNumber, block);
+        }
     }
 
     Clean() {
@@ -500,7 +384,7 @@ class Doc {
         let page;
         for (let pageIndex = 0; pageIndex < this.#m_pages.length; pageIndex++){
             page = this.#m_pages[pageIndex].ToJSON();
-            myPages = {...myPages, page};
+            myPages["page"+pageIndex] = page;
         }
 
         let myBlocks = {};
@@ -508,9 +392,7 @@ class Doc {
         for (let blockIndex = 0; blockIndex < this.#m_blocks.length; blockIndex++){
             block = this.#m_blocks[blockIndex].ToJSON();
             myBlocks["block"+blockIndex] = block;
-            console.log(myBlocks);
         }
-        //console.log(myBlocks);
 
         return JSON.stringify({
             m_name: this.#m_name,
@@ -524,25 +406,21 @@ class Doc {
     FromJSON(json) {
         let myPages = [];
         let temp;
-
-        for(let pageIndex=0; pageIndex < json.m_pages.length; pageIndex++) {
+        let key;
+        for(let pageIndex=0; pageIndex < Object.keys(json.m_pages).length; pageIndex++) {
             temp = new Page();
-            temp.FromJSON(json.m_pages[pageIndex]);
+            key = Object.keys(json.m_pages)[pageIndex];
+            temp.FromJSON(json.m_pages[key]);
             myPages.push(temp);
         }
 
         let myBlocks = [];
         for(let blockIndex=0; blockIndex < Object.keys(json.m_blocks).length; blockIndex++) {
             temp = new Block();
-            let keys = Object.keys(json.m_blocks)[blockIndex];
-            console.log(keys);
-            console.log(json.m_blocks.keys);
-            console.log(json.m_blocks);
-            temp.FromJSON(json.m_blocks.Object.keys(json.m_blocks)[blockIndex]);
+            key = Object.keys(json.m_blocks)[blockIndex];
+            temp.FromJSON(json.m_blocks[key]);
             myBlocks.push(temp);
         }
-
-        console.log(json.m_name);
 
         this.#m_name = json.m_name;
         this.#m_isDirty = json.m_isDirty;
