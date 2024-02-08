@@ -119,18 +119,13 @@ class Block {
     #m_type = "default";
     #m_priority = 3;
     #m_alignment = "left";
-    #m_text = [];
+    #m_text = '';
 
-    constructor(template=null, type='default', priority=3, alignment='left') {
+    constructor(text='', type='default', priority=3, alignment='left') {
         this.#m_type = type;
         this.#m_priority = priority;
         this.#m_alignment = alignment;
-
-        if(template != null) {
-            for(let textIndex = 0; textIndex < template.length; textIndex++) {
-                this.AddText(this.#m_text.length, template[textIndex]);
-            }
-        }
+        this.#m_text = text;
     }
 
     //Returns if anything is contined within or if it can be deleted upon save.
@@ -146,11 +141,11 @@ class Block {
         return isEmpty;
     }
 
-    AddText(number, textObject = new Words()) {
+    SetText(text) {
         this.#m_isDirty = true;
-        this.#m_text.splice(number, 0, textObject); //TODO: +1?
+        this.#m_text = text;
 
-        return this.#m_text.length;
+        return this.#m_text;
     }
 
     RemoveText(number) {
@@ -161,13 +156,7 @@ class Block {
     }
 
     GetText() {
-        let text = '';
-
-        for(let textIndex = 0; textIndex < this.#m_text.length; textIndex++) {
-            text += this.#m_text[textIndex].GetText();
-        }
-
-        return text;
+        return this.#m_text;
     }
 
     GetWords() {
@@ -176,27 +165,18 @@ class Block {
 
     //Removes all empty text objects from the block and returns the number of deleted text objects.
     Clean() {
-        this.#m_isDirty = true; //Could check if count > 0, but if run concurrently, then there're problems
-
-        let count = this.#m_text.length;
-        this.#m_text = this.#m_text.filter(textObject => textObject.IsEmpty() == true);
-        count -= this.#m_text.length;
-
-        return count;
+        return this.#m_text.length == 0
     }
 
     WordCount(trueAverage = true) {
         let count = 0;
         let average = 0;
-        let textArray;
+        let textArray = this.#m_text.GetText().split(" ");
+        
+        count += textArray.length;
 
-        for(let textIndex=0; textIndex < this.#m_text.length; textIndex++) {
-            textArray = this.#m_text[textIndex].GetText().split(" ");
-            count += textArray.length;
-
-            for(let wordIndex=0; wordIndex < textArray.length; wordIndex++) {
-                average += textArray[wordIndex].length;
-            }
+        for(let wordIndex=0; wordIndex < textArray.length; wordIndex++) {
+            average += textArray[wordIndex].length;
         }
 
         if(trueAverage) {
@@ -229,37 +209,21 @@ class Block {
     }
 
     ToJSON(){
-        let myWords = {};
-        let text;
-        for (let textIndex = 0; textIndex < this.#m_text.length; textIndex++){
-            text = this.#m_text[textIndex].ToJSON();
-            myWords = {...myWords, text};
-        }
-
         return {
             m_isDirty: this.#m_isDirty,
             m_type: this.#m_type,
             m_priority: this.#m_priority,
             m_alignment: this.#m_alignment,
-            m_text: myWords
+            m_text: this.#m_text
         }
     }
 
     FromJSON(json) {
-        let myWords = [];
-        let temp;
-
-        for(let text in json.m_text) {
-            temp = new Words();
-            temp.FromJSON(json.m_text[text]);
-            myWords.push(temp);
-        }
-
         this.#m_isDirty = json.m_isDirty;
         this.#m_type = json.m_type;
         this.#m_priority = json.m_priority;
         this.#m_alignment = json.m_priority;
-        this.#m_text = myWords;
+        this.#m_text = json.m_text;
     }
 }
 
@@ -359,9 +323,9 @@ class Page {
 
     FromJSON(json) {
         let myBlocks = [];
-        for(let myBlock in json.m_blocks) {
+        for(let blockIndex=0; blockIndex < Object.keys(json.m_blocks).length; blockIndex++) {
             var temp = new Block();
-            temp.FromJSON(json.m_blocks[myBlock]);
+            temp.FromJSON(Object.keys(json.m_blocks)[blockIndex]);
             myBlocks.push(temp);
         }
 
@@ -543,8 +507,10 @@ class Doc {
         let block;
         for (let blockIndex = 0; blockIndex < this.#m_blocks.length; blockIndex++){
             block = this.#m_blocks[blockIndex].ToJSON();
-            myBlocks = {...myBlocks, block};
+            myBlocks["block"+blockIndex] = block;
+            console.log(myBlocks);
         }
+        //console.log(myBlocks);
 
         return JSON.stringify({
             m_name: this.#m_name,
@@ -559,19 +525,24 @@ class Doc {
         let myPages = [];
         let temp;
 
-        for(let myPage in json.m_pages) {
+        for(let pageIndex=0; pageIndex < json.m_pages.length; pageIndex++) {
             temp = new Page();
-            temp.FromJSON(json.m_pages[myPage]);
+            temp.FromJSON(json.m_pages[pageIndex]);
             myPages.push(temp);
         }
 
         let myBlocks = [];
-        let myWords = [];
-        for(let myBlock in json.m_blocks) {
+        for(let blockIndex=0; blockIndex < Object.keys(json.m_blocks).length; blockIndex++) {
             temp = new Block();
-            temp.FromJSON(json.m_blocks[myBlock]);
-            myWords.push(temp);
+            let keys = Object.keys(json.m_blocks)[blockIndex];
+            console.log(keys);
+            console.log(json.m_blocks.keys);
+            console.log(json.m_blocks);
+            temp.FromJSON(json.m_blocks.Object.keys(json.m_blocks)[blockIndex]);
+            myBlocks.push(temp);
         }
+
+        console.log(json.m_name);
 
         this.#m_name = json.m_name;
         this.#m_isDirty = json.m_isDirty;

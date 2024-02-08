@@ -198,7 +198,7 @@
 
         //Create document with data from popup window
         var fileContent = `${fileText}`;
-        var file = new Blob([fileContent], {type: 'text/plain'});
+        var file = new Blob([new Doc(fileName).ToJSON()], {type: 'text/plain'});
         var metadata = {
             'name': `${fileName}`,
             'mimeType': 'text/plain',

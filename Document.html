@@ -89,8 +89,16 @@
                 'responseType': 'arraybuffer',
                 });
 
-                DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res))).result;
-                console.log(SON.stringify(res));
+                // let bigString = '';
+                // let stringArray = JSON.stringify(res).split('\\');
+                // for(let stringIndex=0; stringIndex < stringArray.length; stringIndex++) {
+                //     bigString += stringArray[stringIndex];
+                // }
+
+                // console.log(bigString);
+                DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
+                console.log(JSON.parse(JSON.stringify(res)).result);
+                console.log(DOCUMENT);
             }
 
             //Create pages/blocks based on DOCUMENT
@@ -238,7 +246,10 @@
         function handleCreateBlockTemplateClick() {
             //Populate menu to create new block
             document.getElementById("selected_menu").innerHTML = `
-            <div>Please enter a block name: <textarea id="block_type" style="height: 10px; width: 60px; resize: none;"></textarea></div>
+            <div>
+                <label>Please enter a block name: </label>
+                <textarea id="block_type" style="height: 10px; width: 60px; resize: none;"></textarea>
+            </div>
             <div>
                 <label>Please select a text alignment for the block: </label>
                 <select name="priority" id="block_priority">
@@ -253,9 +264,9 @@
                     <option value="9">9</option>
                 </select>
             </div>
-            <div id="block_alignment">
+            <div>
                 <label>Please select a text alignment for the block: </label>
-                <select name="priority" id="block_priority">
+                <select name="alignment" id="block_alignment">
                     <option value="left">left</option>
                     <option value="center">center</option>
                     <option value="right">right</option>
@@ -264,14 +275,14 @@
             <div id="submit"><button id="submit_button" onclick="handleAddBlockClick()">Submit</button></div>`;
         }
 
-        function handleCreateBlockClick() {
+        function handleCreateBlockClick(block) {
             //Append block to end of last page
             //TODO: Allow for blocks to be added anywhere
-            /*block = new Block().FromJSON(block);
+            block = new Block().FromJSON(block);
             let HTMLText = loadBlock(block);
             let pages = document.getElementsByClassName('page'); //Load pages
 
-            pages[pages.length - 1].innerHTML += HTMLText; //Load block into end of last page*/
+            pages[pages.length - 1].innerHTML += HTMLText; //Load block into end of last page
         }
 
         function handleCleanClick() {
@@ -318,13 +329,15 @@
                 <div class="grid-container">
                     <div class="grid-item"><button id="create_block_template" onclick="handleCreateBlockTemplateClick()">Create New Block Template</button></div>`;
 
-                let blocks = DOCUMENT.GetBlocks()
-                for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {/*${blocks[blockIndex].ToJSON()}*/
-                    menu.innerHTML += `<div class="grid-item"><button onclick="handleCreateBlockClick()">Create ${blocks[blockIndex].GetType()} Block</button></div>`
+                let blocks = DOCUMENT.GetBlocks();
+                for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    menu.innerHTML += `<div class="grid-item"><button onclick="handleCreateBlockClick(${String(blocks[blockIndex].ToJSON())})">Create ${blocks[blockIndex].GetType()} Block</button></div>`
                 }
 
                 menu.innerHTML += '</div>';
                 menu.style.visibility = 'visible';
+
+                console.log(DOCUMENT);
             }
         }
 
