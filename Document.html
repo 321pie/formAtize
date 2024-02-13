@@ -192,13 +192,8 @@
         function handleCreateBlockClick(block) {
             //Append block to end of last page
             //TODO: Allow for blocks to be added anywhere
-            console.log('In click Function!');
             let argJSON = block.getAttribute('data-arg1');
             argJSON = argJSON.replaceAll("'", '"');
-            console.log(argJSON);
-            console.log(JSON.parse(argJSON));
-            console.log('Adding block');
-            console.log(new Block().FromJSON(JSON.parse(argJSON)));
             block = new Block();
             block.FromJSON(JSON.parse(argJSON));
             //console.log(new Block().FromJSON(JSON.parse(block)));
@@ -215,6 +210,43 @@
             pages[pages.length - 1].innerHTML += HTMLText; //Load block into end of last page
             DOCUMENT.AddBlockToPage(block);
             console.log(DOCUMENT);
+        }
+
+        function handleDisplayEntireBlockClick(block) {
+            let argJSON = block.getAttribute('data-arg1');
+            argJSON = argJSON.replaceAll("'", '"');
+        }
+
+        function handleDisplayBlockClick(blockName) {
+            document.getElementById('block_display').innerHTML = '';
+
+            let blocks = [];
+            let pages = DOCUMENT.GetPages();
+            let pageBlocks;
+            for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
+                pageBlocks = pages[pageIndex].GetBlocks();
+
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    blocks.push(pageBlocks[blockIndex]);
+                }
+            }
+
+            if(blockName === "All") {
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button>`;
+                }
+            }
+            else {
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    if(blocks[blockIndex].GetType() === blockName) {
+                        document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button>`;
+                    }
+                }
+            }
+        }
+
+        function handleSubmitTypeDropdownClick() {
+            handleDisplayBlockClick(document.getElementById('type_dropdown').value);
         }
 
         function handleCleanClick() {
@@ -302,9 +334,33 @@
                 <div id="word_count">Word Count: ${wordCount[0]}</div>
                 <div id="average_word_count">Average Word Length: ${wordCount[1]}</div>
                 <div id="clean"><button id="clean_button" onclick="handleCleanClick()">Clean Document</button></div>
-                <div>Dropdown to select blocks of a certain type or all blocks</div>
-                <div>List of blocks</div>
+                <select id="type_dropdown">
+                    <option value="All">All</option>
+                </select>
+                <button id="submit_type_dropdown" onClick="handleSubmitTypeDropdownClick()">Change Display</button>
+                <div id="block_display" style="height: 100px; overflow-y: auto;"></div>
                 `;
+
+                let blocks = DOCUMENT.GetBlocks();
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    document.getElementById('type_dropdown').innerHTML += `<option value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetType()}</option>`;
+                }
+
+                blocks = [];
+                let pages = DOCUMENT.GetPages();
+                let pageBlocks;
+                for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
+                    pageBlocks = pages[pageIndex].GetBlocks();
+
+                    for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                        blocks.push(pageBlocks[blockIndex]);
+                    }
+                }
+
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button>`;
+                }
+
                 menu.style.visibility = 'visible';
             }
         }
