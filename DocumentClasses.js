@@ -108,7 +108,6 @@ class Block {
     }
 
     FromJSON(json) {
-        console.log(json);
         this.#m_isDirty = json.m_isDirty;
         this.#m_type = json.m_type;
         this.#m_priority = json.m_priority;
@@ -194,7 +193,6 @@ class Page {
     FromJSON(json) {
         let myBlocks = [];
         let key;
-        console.log(json);
 
         for(let blockIndex=0; blockIndex < Object.keys(json.m_blocks).length; blockIndex++) {
             var temp = new Block();
@@ -202,8 +200,6 @@ class Page {
             temp.FromJSON(json.m_blocks[key]);
             myBlocks.push(temp);
         }
-
-        console.log(myBlocks);
 
         this.#m_blocks = myBlocks;
         this.#m_isDirty = json.m_isDirty;
