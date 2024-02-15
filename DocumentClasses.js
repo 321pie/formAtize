@@ -6,14 +6,20 @@ class Block {
     #m_header = false;
     #m_footer = false;
     #m_text = '';
+    #m_font = "arial";
+    #m_fontColor = "black";
+    #m_fontSize = 12;
 
-    constructor(text='', type='default', priority=3, alignment='left', header=false, footer=false) {
+    constructor(text='', type='default', priority=3, alignment='left', header=false, footer=false, font='arial', fontColor='black', fontSize=12) {
         this.#m_type = type;
         this.#m_priority = priority;
         this.#m_alignment = alignment;
         this.#m_text = text;
         this.#m_header = header;
         this.#m_footer = footer;
+        this.#m_font = font;
+        this.#m_fontColor = fontColor;
+        this.#m_fontSize = size;
     }
 
     //Returns if anything is contined within or if it can be deleted upon save.
@@ -48,6 +54,33 @@ class Block {
     SetFooter(footer) {
         this.#m_isDirty = true;
         this.#m_footer = footer;
+    }
+
+    GetFont() {
+        return this.#m_font;
+    }
+
+    SetFont(font) {
+        this.#m_isDirty = true;
+        this.#m_font = font;
+    }
+
+    GetFontColor() {
+        return this.#m_fontColor;
+    }
+
+    SetFontColor(fontColor) {
+        this.#m_isDirty = true;
+        this.#m_fontColor = fontColor;
+    }
+
+    GetFontSize() {
+        return this.#m_fontSize;
+    }
+
+    SetFontSize(fontSize) {
+        this.#m_isDirty = true;
+        this.#m_fontSize = fontSize;
     }
 
     //Removes all empty text objects from the block and returns the number of deleted text objects.
@@ -103,7 +136,10 @@ class Block {
             m_alignment: this.#m_alignment,
             m_text: this.#m_text,
             m_header: this.#m_header,
-            m_footer: this.#m_footer
+            m_footer: this.#m_footer,
+            m_font: this.#m_font,
+            m_fontColor: this.#m_fontColor,
+            m_fontSize: this.#m_fontSize
         }
     }
 
@@ -115,6 +151,9 @@ class Block {
         this.#m_text = json.m_text;
         this.#m_header = json.m_header;
         this.#m_footer = json.m_footer;
+        this.#m_font = json.m_font;
+        this.#m_fontColor = json.m_fontColor;
+        this.#m_fontSize = json.m_fontSize;
     }
 }
 

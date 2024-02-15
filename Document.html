@@ -43,7 +43,7 @@
 
         function loadBlock(block) {
             //words = block.GetWords();
-            let HTMLText = `<div contenteditable="true" class="block">${block.GetText()}</div>`;
+            let HTMLText = `<div contenteditable="true" class="block" style="">${block.GetText()}</div>`;
 
             return HTMLText;
         }
@@ -209,6 +209,11 @@
             DOCUMENT.AddBlockToPage(block);
         }
 
+        function handleSaveAndLoadDocument() {
+            handleSaveDocumentClick(false);
+            loadText(false);
+        }
+
         function handleDisplayEntireBlockClick(block) {
             let argJSON = block.getAttribute('data-arg1');
             argJSON = argJSON.replaceAll("'", '"');
@@ -264,6 +269,38 @@
             handleDisplayBlockClick(document.getElementById('type_dropdown').value);
         }
 
+        function handleChangeFontSize(increase=true) {
+            let pages = DOCUMENT.GetPages();
+            let blocks;
+            for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
+                blocks = pages[pageIndex].GetBlocks();
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    if(increase == true) {
+                        blocks[blockIndex].SetFontSize(blocks[blockIndex].GetFontSize() + 1);
+                    }
+                    else {
+                        blocks[blockIndex].SetFontSize(blocks[blockIndex].GetFontSize() - 1);
+                    }
+                }
+            }
+
+            handleSaveAndLoadDocument();
+        }
+
+        function handleGlobalBlockClick() {
+            let pages = DOCUMENT.GetPages();
+            let blocks;
+            for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
+                blocks = pages[pageIndex].GetBlocks();
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    blocks[blockIndex].SetFont(document.getElementById('font_family').value);
+                    blocks[blockIndex].SetFontColor(document.getElementById('font_color').value);
+                }
+            }
+
+            handleSaveAndLoadDocument();
+        }
+
         function handleCleanClick() {
             handleSaveDocumentClick(false); //Syncs DOCUMENT to actual data
             DOCUMENT.Clean();
@@ -277,20 +314,60 @@
         }
 
         function handleEditMenuClick() {
-            /*let target = document.getElementById('pages');
+            let menu = document.getElementById("selected_menu");
 
-            if (window.getComputedStyle(target).display === 'none') {
-                //TODO: Clear div
-                document.getElementById("selected_menu").style.visibility = 'hidden';
-
-                return slideDown(target);
+            if(menu.innerHTML != '') {
+                //Clear div
+                menu.innerHTML = '';
+                menu.style.visibility = 'hidden';
             }
             else {
-                //TODO: Populate div
-                document.getElementById("selected_menu").style.visibility = 'visible';
+                //Populate div
+                handleSaveDocumentClick(false); //Syncs DOCUMENT to actual data
 
-                return slideUp(target);
-            }*/
+                menu.innerHTML = `
+                <div id="global_edits">
+                    <label>Global Edits</label>
+                    <div id="font_size">
+                        <label>Font Size: </label>
+                        <button onClick="handleChangeFontSize(true)">+</button>
+                        <button onClick="handleChangeFontSize(false)">-</button>
+                    </div>
+                    <div id="font_family">
+                        <label>Font: </label>
+                        <select id="type_dropdown">
+                            <option value="arial">Arial</option>
+                            <option value="sans-serif">Sans Serif</option>
+                            <option value="cursive">Cursive</option>
+                        </select>
+                    </div>
+                    <div id="font_color">
+                        <label>Font Color: </label>
+                        <select id="type_dropdown">
+                            <option value="MediumSeaGreen">Green</option>
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Teal">Teal</option>
+                            <option value="Tomato">Tomato</option>
+                            <option value="DodgerBlue">Blue</option>
+                        </select>
+                    </div>
+                    <div id="submit">
+                        <button onClick="handleGlobalBlockClick()">Submit</button>
+                    </div>
+                </div>`
+                    
+                let blocks = DOCUMENT.GetBlocks();
+                for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    let blockDiv = document.createElement("div");
+                    blockDiv.setAttribute("class", "grid-item");
+                    blockDiv.innerHTML=`<button data-arg1="${JSON.stringify(blocks[blockIndex].ToJSON()).replaceAll('"', "'")}" onClick="handleCreateBlockClick(this)">Create ${blocks[blockIndex].GetType()} Block</button>`;
+
+                    menu.appendChild(blockDiv);
+                }
+                
+                menu.style.visibility = 'visible';
+            }
         }
 
         function handleBlockMenuClick() {
@@ -318,7 +395,6 @@
                     menu.appendChild(blockDiv);
                 }
 
-                //menu.innerHTML += '</div>';
                 menu.style.visibility = 'visible';
             }
         }
