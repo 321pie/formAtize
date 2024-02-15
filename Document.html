@@ -38,12 +38,10 @@
         localStorage.clear();
 
         //Hide selected menu
-        //document.getElementById("selected_menu").style.visibility = 'hidden';
         document.getElementById("selected_menu").innerHTML = '';
 
         function loadBlock(block) {
-            //words = block.GetWords();
-            let HTMLText = `<div contenteditable="true" class="block" style="">${block.GetText()}</div>`;
+            let HTMLText = `<div contenteditable="true" class="block" style="font-family: ${block.GetFont()}; font-size: ${block.GetFontSize()}; color: ${block.GetFontColor()};">${block.GetText()}</div>`;
 
             return HTMLText;
         }
@@ -319,7 +317,6 @@
             if(menu.innerHTML != '') {
                 //Clear div
                 menu.innerHTML = '';
-                menu.style.visibility = 'hidden';
             }
             else {
                 //Populate div
@@ -365,8 +362,6 @@
 
                     menu.appendChild(blockDiv);
                 }
-                
-                menu.style.visibility = 'visible';
             }
         }
 
@@ -376,7 +371,6 @@
             if(menu.innerHTML != '') {
                 //Clear div
                 menu.innerHTML = '';
-                menu.style.visibility = 'hidden';
             }
             else {
                 //Populate div
@@ -394,8 +388,6 @@
 
                     menu.appendChild(blockDiv);
                 }
-
-                menu.style.visibility = 'visible';
             }
         }
 
@@ -405,7 +397,6 @@
             if(menu.innerHTML != '') {
                 //Clear div
                 menu.innerHTML = '';
-                menu.style.visibility = 'hidden';
             }
             else {
                 //Populate div
@@ -428,8 +419,6 @@
                 }
 
                 handleDisplayBlockClick('All');
-
-                menu.style.visibility = 'visible';
             }
         }
     </script>
