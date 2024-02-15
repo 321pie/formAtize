@@ -196,20 +196,17 @@
             argJSON = argJSON.replaceAll("'", '"');
             block = new Block();
             block.FromJSON(JSON.parse(argJSON));
-            //console.log(new Block().FromJSON(JSON.parse(block)));
+
             let HTMLText = loadBlock(block);
             let pages = document.getElementsByClassName('page'); //Load pages
 
-            console.log(pages);
             if(pages.length == 0) {
                 addPage();
                 pages = document.getElementsByClassName('page'); //Load pages
             }
 
-            console.log('Adding to page and document');
             pages[pages.length - 1].innerHTML += HTMLText; //Load block into end of last page
             DOCUMENT.AddBlockToPage(block);
-            console.log(DOCUMENT);
         }
 
         function handleDisplayEntireBlockClick(block) {
@@ -226,22 +223,40 @@
             for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
                 pageBlocks = pages[pageIndex].GetBlocks();
 
-                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                for(let blockIndex=0; blockIndex < pageBlocks.length; blockIndex++) {
                     blocks.push(pageBlocks[blockIndex]);
                 }
             }
 
             if(blockName === "All") {
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button>`;
+                    for(let space=0; space < (blocks[blockIndex].GetPriority() - 1); space++) {
+                        document.getElementById('block_display').innerHTML += '&nbsp;&nbsp;&nbsp;';
+                    }
+                    document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button><br/>`;
                 }
             }
             else {
+                let tempWordArray;
+                let blockCount = 0;
+                let wordCount = 0;
+                let averageWordLength = 0;
+
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
                     if(blocks[blockIndex].GetType() === blockName) {
-                        document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button>`;
+                        tempWordArray = blocks[blockIndex].WordCount();
+                        blockCount++;
+                        wordCount += tempWordArray[0];
+                        averageWordLength += tempWordArray[1];
+
+                        document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button><br/>`;
                     }
                 }
+
+                averageWordLength /= blockCount;
+
+                document.getElementById('word_count').innerText = "Word Count: " + wordCount;
+                document.getElementById('average_word_count').innerText = "Average Word Length: " + averageWordLength;
             }
         }
 
@@ -300,18 +315,7 @@
                     blockDiv.setAttribute("class", "grid-item");
                     blockDiv.innerHTML=`<button data-arg1="${JSON.stringify(blocks[blockIndex].ToJSON()).replaceAll('"', "'")}" onClick="handleCreateBlockClick(this)">Create ${blocks[blockIndex].GetType()} Block</button>`;
 
-                    //let passBlock = blocks[blockIndex];
-                    //handleCreateBlockClick(passBlock);
-                    /*blockDiv.firstChild.addEventListener('click', function(this) {
-                        console.log('In click Function!');
-                        let argJSON = this.getAttribute('data-arg1');
-                        console.log(argJSON);
-                        handleCreateBlockClick(new Block().FromJSON(argJSON));
-                    });*/
-
-                    console.log('Adding child');
                     menu.appendChild(blockDiv);
-                    //menu.innerHTML += `<div id="${blocks[blockIndex].GetType()}" class="grid-item"><button onclick="handleCreateBlockClick(${blocks[blockIndex].GetType()})">Create ${blocks[blockIndex].GetType()} Block</button></div>`
                 }
 
                 //menu.innerHTML += '</div>';
@@ -347,20 +351,7 @@
                     document.getElementById('type_dropdown').innerHTML += `<option value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetType()}</option>`;
                 }
 
-                blocks = [];
-                let pages = DOCUMENT.GetPages();
-                let pageBlocks;
-                for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
-                    pageBlocks = pages[pageIndex].GetBlocks();
-
-                    for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                        blocks.push(pageBlocks[blockIndex]);
-                    }
-                }
-
-                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button>`;
-                }
+                handleDisplayBlockClick('All');
 
                 menu.style.visibility = 'visible';
             }
