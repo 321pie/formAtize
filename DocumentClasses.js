@@ -150,7 +150,7 @@ class Page {
         this.#m_isDirty = true; //Could check if count > 0, but if run concurrently, then there're problems
 
         let count = this.#m_blocks.length;
-        this.#m_blocks = this.#m_blocks.filter(block => block.IsEmpty() == true);
+        this.#m_blocks = this.#m_blocks.filter(block => block.IsEmpty() != true);
         count -= this.#m_blocks.length;
 
         return count;
@@ -247,8 +247,9 @@ class Doc {
     IsEmpty() {
         let isEmpty = true;
 
-        for(const page in this.#m_pages) {
-            if(page.IsEmpty() == false) {
+        let pages = this.#m_pages;
+        for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
+            if(pages[pageIndex].IsEmpty() == false) {
                 isEmpty = false;
             }
         }
@@ -288,13 +289,19 @@ class Doc {
         this.#m_isDirty = true; //Could check if count > 0, but if run concurrently, then there're problems
 
         let count = this.#m_pages.length;
-        this.#m_pages = this.#m_pages.filter(page => page.IsEmpty() == true);
+        this.#m_pages = this.#m_pages.filter(page => page.IsEmpty() != true);
         count -= this.#m_pages.length;
+
+        let pages = this.#m_pages;
+        for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
+            pages[pageIndex].Clean();
+        }
 
         return count;
     }
 
     Clear() {
+        this.m_isDirty = true;
         this.#m_pages = [];
     }
 

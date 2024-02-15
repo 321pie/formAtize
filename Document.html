@@ -250,10 +250,11 @@
         }
 
         function handleCleanClick() {
+            handleSaveDocumentClick(false); //Syncs DOCUMENT to actual data
             DOCUMENT.Clean();
 
             document.getElementById("pages").innerHTML = '';
-            loadText();
+            loadText(false);
 
             //Close Display menu and reopen for reload of blocks
             handleDisplayMenuClick();
