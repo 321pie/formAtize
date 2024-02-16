@@ -41,7 +41,7 @@
         document.getElementById("selected_menu").innerHTML = '';
 
         function loadBlock(block) {
-            let HTMLText = `<div contenteditable="true" class="block" style="font-family: ${block.GetFont()}; font-size: ${block.GetFontSize()}px; color: ${block.GetFontColor()};">${block.GetText()}</div>`;
+            let HTMLText = `<div contenteditable="true" class="block" style="font-family: ${block.GetFont()}; font-size: ${block.GetFontSize()}px; color: ${block.GetFontColor()}; text-align: ${block.GetAlignment()};">${block.GetText()}</div>`;
 
             return HTMLText;
         }
@@ -274,10 +274,11 @@
             let HTMLBlocks = [];
             if(globally == false) {
                 let temp = document.getElementById("block_display").getElementsByClassName("blocks");
-                for(blockIndex=0; blockIndex < HTMLBlocks.length; blockIndex++) {
-                    HTMLBlocks.push(temp[blockIndex].value);
+                for(blockIndex=0; blockIndex < temp.length; blockIndex++) {
+                    if(temp[blockIndex].checked == true) {
+                        HTMLBlocks.push(temp[blockIndex].value);
+                    }
                 }
-                console.log(HTMLBlocks);
             }
             
             let pages = DOCUMENT.GetPages();
@@ -285,7 +286,7 @@
             for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
                 blocks = pages[pageIndex].GetBlocks();
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    if((globally == true) || ((globally == false) && (HTMLBlocks.indexOf(blockIndex) != -1))) {
+                    if((globally == true) || ((globally == false) && (HTMLBlocks.indexOf(String(blockIndex)) != -1))) {
                         if(increase == true)
                             blocks[blockIndex].SetFontSize(blocks[blockIndex].GetFontSize() + 1);
                         else
@@ -301,10 +302,11 @@
             let HTMLBlocks = [];
             if(globally == false) {
                 let temp = document.getElementById("block_display").getElementsByClassName("blocks");
-                for(blockIndex=0; blockIndex < HTMLBlocks.length; blockIndex++) {
-                    HTMLBlocks.push(temp[blockIndex].value);
+                for(blockIndex=0; blockIndex < temp.length; blockIndex++) {
+                    if(temp[blockIndex].checked == true) {
+                        HTMLBlocks.push(temp[blockIndex].value);
+                    }
                 }
-                console.log(HTMLBlocks);
             }
 
             let pages = DOCUMENT.GetPages();
@@ -312,7 +314,7 @@
             for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
                 blocks = pages[pageIndex].GetBlocks();
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    if((globally == true) || ((globally == false) && (HTMLBlocks.indexOf(blockIndex) != -1))) {
+                    if((globally == true) || ((globally == false) && (HTMLBlocks.indexOf(String(blockIndex)) != -1))) {
                         if(document.getElementById('font_family').value != "")
                             blocks[blockIndex].SetFont(document.getElementById('font_family').value);
                         if(document.getElementById('font_color').value != "")
