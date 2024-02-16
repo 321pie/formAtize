@@ -126,7 +126,7 @@
                 blocks = pages.item(pageIndex).getElementsByClassName('block');
 
                 for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-                    docBlocks[docBlockIndex].SetText(blocks[blockIndex].innerText);
+                    docBlocks[docBlockIndex].SetText(blocks[blockIndex].innerHTML);
                     curPage.AddBlock(blocks.length, docBlocks[docBlockIndex]);
                     docBlockIndex++;
                 }
