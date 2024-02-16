@@ -147,7 +147,7 @@ class Block {
         this.#m_isDirty = json.m_isDirty;
         this.#m_type = json.m_type;
         this.#m_priority = json.m_priority;
-        this.#m_alignment = json.m_priority;
+        this.#m_alignment = json.m_alignment;
         this.#m_text = json.m_text;
         this.#m_header = json.m_header;
         this.#m_footer = json.m_footer;

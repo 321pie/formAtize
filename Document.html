@@ -315,10 +315,10 @@
                 blocks = pages[pageIndex].GetBlocks();
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
                     if((globally == true) || ((globally == false) && (HTMLBlocks.indexOf(String(blockIndex)) != -1))) {
-                        if(document.getElementById('font_family').value != "")
-                            blocks[blockIndex].SetFont(document.getElementById('font_family').value);
-                        if(document.getElementById('font_color').value != "")
-                            blocks[blockIndex].SetFontColor(document.getElementById('font_color').value);
+                        if(document.getElementById('local_font_family').value != "")
+                            blocks[blockIndex].SetFont(document.getElementById('local_font_family').value);
+                        if(document.getElementById('local_font_color').value != "")
+                            blocks[blockIndex].SetFontColor(document.getElementById('local_font_color').value);
                     }
                 }
             }
@@ -388,7 +388,7 @@
                         <button onClick="handleChangeFontSize(false, false)">-</button>
                         &nbsp;&nbsp;&nbsp;
                         <label>Font: </label>
-                        <select id="font_family">
+                        <select id="local_font_family">
                             <option value="">No Change</option>
                             <option value="serif">Serif</option>
                             <option value="sans-serif">Sans Serif</option>
@@ -396,7 +396,7 @@
                         </select>
                         &nbsp;&nbsp;&nbsp;
                         <label>Font Color: </label>
-                        <select id="font_color">
+                        <select id="local_font_color">
                             <option value="">No Change</option>
                             <option value="Black">Black</option>
                             <option value="MediumSeaGreen">Green</option>
