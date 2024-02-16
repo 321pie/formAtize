@@ -41,7 +41,7 @@
         document.getElementById("selected_menu").innerHTML = '';
 
         function loadBlock(block) {
-            let HTMLText = `<div contenteditable="true" class="block" style="font-family: ${block.GetFont()}; font-size: ${block.GetFontSize()}; color: ${block.GetFontColor()};">${block.GetText()}</div>`;
+            let HTMLText = `<div contenteditable="true" class="block" style="font-family: ${block.GetFont()}; font-size: ${block.GetFontSize()}px; color: ${block.GetFontColor()};">${block.GetText()}</div>`;
 
             return HTMLText;
         }
@@ -60,6 +60,9 @@
 
                 DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
             }
+
+            //Clear section
+            document.getElementById('pages').innerHTML = '';
 
             //Create pages/blocks based on DOCUMENT
             let pages = DOCUMENT.GetPages();
@@ -117,15 +120,15 @@
             DOCUMENT.Clear();
 
             pages = document.getElementsByClassName('page');
-
+            let docBlockIndex = 0;
             for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
                 let curPage = new Page();
                 blocks = pages.item(pageIndex).getElementsByClassName('block');
 
                 for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-                    block = docBlocks[blockIndex];
-                    block.SetText(blocks[blockIndex].innerText);
-                    curPage.AddBlock(blocks.length, block);
+                    docBlocks[docBlockIndex].SetText(blocks[blockIndex].innerText);
+                    curPage.AddBlock(blocks.length, docBlocks[docBlockIndex]);
+                    docBlockIndex++;
                 }
 
                 DOCUMENT.AddPage(DOCUMENT.GetPageCount(), curPage);
@@ -267,17 +270,26 @@
             handleDisplayBlockClick(document.getElementById('type_dropdown').value);
         }
 
-        function handleChangeFontSize(increase=true) {
+        function handleChangeFontSize(increase=true, globally=true) {
+            let HTMLBlocks = [];
+            if(globally == false) {
+                let temp = document.getElementById("block_display").getElementsByClassName("blocks");
+                for(blockIndex=0; blockIndex < HTMLBlocks.length; blockIndex++) {
+                    HTMLBlocks.push(temp[blockIndex].value);
+                }
+                console.log(HTMLBlocks);
+            }
+            
             let pages = DOCUMENT.GetPages();
             let blocks;
             for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
                 blocks = pages[pageIndex].GetBlocks();
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    if(increase == true) {
-                        blocks[blockIndex].SetFontSize(blocks[blockIndex].GetFontSize() + 1);
-                    }
-                    else {
-                        blocks[blockIndex].SetFontSize(blocks[blockIndex].GetFontSize() - 1);
+                    if((globally == true) || ((globally == false) && (HTMLBlocks.indexOf(blockIndex) != -1))) {
+                        if(increase == true)
+                            blocks[blockIndex].SetFontSize(blocks[blockIndex].GetFontSize() + 1);
+                        else
+                            blocks[blockIndex].SetFontSize(blocks[blockIndex].GetFontSize() - 1);
                     }
                 }
             }
@@ -285,14 +297,27 @@
             handleSaveAndLoadDocument();
         }
 
-        function handleGlobalBlockClick() {
+        function handleSubmitBlockEditClick(globally=true) {
+            let HTMLBlocks = [];
+            if(globally == false) {
+                let temp = document.getElementById("block_display").getElementsByClassName("blocks");
+                for(blockIndex=0; blockIndex < HTMLBlocks.length; blockIndex++) {
+                    HTMLBlocks.push(temp[blockIndex].value);
+                }
+                console.log(HTMLBlocks);
+            }
+
             let pages = DOCUMENT.GetPages();
             let blocks;
             for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
                 blocks = pages[pageIndex].GetBlocks();
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    blocks[blockIndex].SetFont(document.getElementById('font_family').value);
-                    blocks[blockIndex].SetFontColor(document.getElementById('font_color').value);
+                    if((globally == true) || ((globally == false) && (HTMLBlocks.indexOf(blockIndex) != -1))) {
+                        if(document.getElementById('font_family').value != "")
+                            blocks[blockIndex].SetFont(document.getElementById('font_family').value);
+                        if(document.getElementById('font_color').value != "")
+                            blocks[blockIndex].SetFontColor(document.getElementById('font_color').value);
+                    }
                 }
             }
 
@@ -324,25 +349,25 @@
 
                 menu.innerHTML = `
                 <div id="global_edits">
-                    <label>Global Edits</label>
-                    <div id="font_size">
+                    <label style="font-size: 14px">Global Edits</label>
+                    <div>
                         <label>Font Size: </label>
                         <button onClick="handleChangeFontSize(true)">+</button>
                         <button onClick="handleChangeFontSize(false)">-</button>
-                    </div>
-                    <div id="font_family">
+                        &nbsp;&nbsp;&nbsp;
                         <label>Font: </label>
-                        <select id="type_dropdown">
-                            <option value="arial">Arial</option>
+                        <select id="font_family">
+                            <option value="">No Change</option>
+                            <option value="serif">Serif</option>
                             <option value="sans-serif">Sans Serif</option>
                             <option value="cursive">Cursive</option>
                         </select>
-                    </div>
-                    <div id="font_color">
+                        &nbsp;&nbsp;&nbsp;
                         <label>Font Color: </label>
-                        <select id="type_dropdown">
-                            <option value="MediumSeaGreen">Green</option>
+                        <select id="font_color">
+                            <option value="">No Change</option>
                             <option value="Black">Black</option>
+                            <option value="MediumSeaGreen">Green</option>
                             <option value="White">White</option>
                             <option value="Teal">Teal</option>
                             <option value="Tomato">Tomato</option>
@@ -350,17 +375,59 @@
                         </select>
                     </div>
                     <div id="submit">
-                        <button onClick="handleGlobalBlockClick()">Submit</button>
+                        <button onClick="handleSubmitBlockEditClick()">Submit</button>
                     </div>
-                </div>`
-                    
-                let blocks = DOCUMENT.GetBlocks();
-                for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {
-                    let blockDiv = document.createElement("div");
-                    blockDiv.setAttribute("class", "grid-item");
-                    blockDiv.innerHTML=`<button data-arg1="${JSON.stringify(blocks[blockIndex].ToJSON()).replaceAll('"', "'")}" onClick="handleCreateBlockClick(this)">Create ${blocks[blockIndex].GetType()} Block</button>`;
+                </div>
+                <div id="block_edits">
+                    <label style="font-size: 14px">Block Edits</label>
+                    <div>
+                        <label>Font Size: </label>
+                        <button onClick="handleChangeFontSize(true, false)">+</button>
+                        <button onClick="handleChangeFontSize(false, false)">-</button>
+                        &nbsp;&nbsp;&nbsp;
+                        <label>Font: </label>
+                        <select id="font_family">
+                            <option value="">No Change</option>
+                            <option value="serif">Serif</option>
+                            <option value="sans-serif">Sans Serif</option>
+                            <option value="cursive">Cursive</option>
+                        </select>
+                        &nbsp;&nbsp;&nbsp;
+                        <label>Font Color: </label>
+                        <select id="font_color">
+                            <option value="">No Change</option>
+                            <option value="Black">Black</option>
+                            <option value="MediumSeaGreen">Green</option>
+                            <option value="White">White</option>
+                            <option value="Teal">Teal</option>
+                            <option value="Tomato">Tomato</option>
+                            <option value="DodgerBlue">Blue</option>
+                        </select>
+                    </div>
+                    <div id="submit">
+                        <button onClick="handleSubmitBlockEditClick(false)">Submit</button>
+                    </div>
+                    <div id="block_display" style="height: 100px; overflow-y: auto;">
+                        <in
+                    </div>
+                </div>`;
 
-                    menu.appendChild(blockDiv);
+                let blocks = [];
+                let pages = DOCUMENT.GetPages();
+                let pageBlocks;
+                for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
+                    pageBlocks = pages[pageIndex].GetBlocks();
+
+                    for(let blockIndex=0; blockIndex < pageBlocks.length; blockIndex++) {
+                        blocks.push(pageBlocks[blockIndex]);
+                    }
+                }
+
+                for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    for(let space=0; space < (blocks[blockIndex].GetPriority() - 1); space++) {
+                        document.getElementById('block_display').innerHTML += '&nbsp;&nbsp;&nbsp;';
+                    }
+                    document.getElementById('block_display').innerHTML += `<input class="blocks" type="checkbox" value="${blockIndex}">${blocks[blockIndex].GetText().substring(0, 10)}</input><br/>`;
                 }
             }
         }

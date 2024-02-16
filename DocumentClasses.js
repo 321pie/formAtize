@@ -19,7 +19,7 @@ class Block {
         this.#m_footer = footer;
         this.#m_font = font;
         this.#m_fontColor = fontColor;
-        this.#m_fontSize = size;
+        this.#m_fontSize = fontSize;
     }
 
     //Returns if anything is contined within or if it can be deleted upon save.
