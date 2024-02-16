@@ -166,7 +166,7 @@
                 <textarea id="block_type" style="height: 10px; width: 60px; resize: none;"></textarea>
             </div>
             <div>
-                <label>Please select a text alignment for the block: </label>
+                <label>Please select a header number for the block: </label>
                 <select name="priority" id="block_priority">
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -174,9 +174,6 @@
                     <option value="4">4</option>
                     <option value="5">5</option>
                     <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
                 </select>
             </div>
             <div>
@@ -235,12 +232,28 @@
             }
 
             if(blockName === "All") {
+                let tempWordArray;
+                let blockCount = 0;
+                let wordCount = 0;
+                let averageWordLength = 0;
+
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
+                    tempWordArray = blocks[blockIndex].WordCount();
+                    blockCount++;
+                    wordCount += tempWordArray[0];
+                    averageWordLength += tempWordArray[1];
+
                     for(let space=0; space < (blocks[blockIndex].GetPriority() - 1); space++) {
                         document.getElementById('block_display').innerHTML += '&nbsp;&nbsp;&nbsp;';
                     }
+
                     document.getElementById('block_display').innerHTML += `<button value="${blocks[blockIndex].GetType()}">${blocks[blockIndex].GetText().substring(0, 10)}</button><br/>`;
                 }
+
+                averageWordLength /= blockCount;
+
+                document.getElementById('word_count').innerText = "Word Count: " + wordCount;
+                document.getElementById('average_word_count').innerText = "Average Word Length: " + averageWordLength;
             }
             else {
                 let tempWordArray;
@@ -351,7 +364,7 @@
 
                 menu.innerHTML = `
                 <div id="global_edits">
-                    <label style="font-size: 14px">Global Edits</label>
+                    <label style="font-size: 20px"><u>Global Edits</u></label>
                     <div>
                         <label>Font Size: </label>
                         <button onClick="handleChangeFontSize(true)">+</button>
@@ -380,8 +393,9 @@
                         <button onClick="handleSubmitBlockEditClick()">Submit</button>
                     </div>
                 </div>
+                <br/>
                 <div id="block_edits">
-                    <label style="font-size: 14px">Block Edits</label>
+                    <label style="font-size: 20px"><u>Block Edits</u></label>
                     <div>
                         <label>Font Size: </label>
                         <button onClick="handleChangeFontSize(true, false)">+</button>
