@@ -166,7 +166,7 @@
                 <textarea id="block_type" style="height: 10px; width: 60px; resize: none;"></textarea>
             </div>
             <div>
-                <label>Please select a header number for the block: </label>
+                <label>Please select a heading number for the block: </label>
                 <select name="priority" id="block_priority">
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -283,6 +283,55 @@
             handleDisplayBlockClick(document.getElementById('type_dropdown').value);
         }
 
+        function handleFontChange(textStyle) {
+            console.log("Reached beginning of function");
+            //Get all textboxes
+            let pages = document.getElementsByClassName('page');
+            let blocks;
+            let block;
+            for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+                blocks = pages.item(pageIndex).getElementsByClassName('block');
+
+                for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+                    block = blocks[blockIndex];
+
+                    //Check if mouse is in box
+                    console.log("Found block");
+                    console.log(block.selection);
+                    if (document.selection) { 
+                        console.log("In selection");
+                        block.focus(); 
+
+                        var selectedRange = document.selection.createRange(); 
+                        if (selectedRange == null) {
+                            console.log("No range");
+                            return true;
+                        } 
+
+                        let range = block.createTextRange();
+                        let range2 = range.duplicate();
+
+                        range.moveToBookmark(selectedRange.getBookmark()); 
+                        range2.setEndPoint('EndToStart', range); 
+
+                        //Add span with specified text-style
+                        console.log("finding strings");
+                        let currentPosition = range2.text.length;
+                        let strLeft = textarea.value.substring(0,currentPosition);
+                        let strMiddle = block.value.substring(block.selectionStart, block.selectionEnd);
+                        let strRight = textarea.value.substring(currentPosition, textarea.value.length);
+                        block.value = strLeft + `<span style="text-style: ${textStyle};">` + strMiddle + '</span>' + strRight;
+
+                        console.log("Reached end of function");
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         function handleChangeFontSize(increase=true, globally=true) {
             let HTMLBlocks = [];
             if(globally == false) {
@@ -332,6 +381,10 @@
                             blocks[blockIndex].SetFont(document.getElementById('local_font_family').value);
                         if(document.getElementById('local_font_color').value != "")
                             blocks[blockIndex].SetFontColor(document.getElementById('local_font_color').value);
+                        if(document.getElementById('local_alignment').value != "")
+                            blocks[blockIndex].SetAlignment(document.getElementById('local_alignment').value);
+                        if(document.getElementById('local_priority').value != "")
+                            blocks[blockIndex].SetPriority(document.getElementById('local_priority').value);
                     }
                 }
             }
@@ -394,6 +447,16 @@
                     </div>
                 </div>
                 <br/>
+                <div id="inline_edits">
+                    <label style="font-size: 20px"><u>Inline Edits</u></label>
+                    <div>
+                        <button onClick="handleFontChange('bold')"><b>Bold<b/></button>
+                        <button onClick="handleFontChange('italic')"><i>Italicize<i/></button>
+                        <button onClick="handleFontChange('underline')"><u>Underline<u/></button>
+                        <button onClick="handleCapsFontChange('capital')">CAPITALIZE</button>
+                        <button onClick="handleCapsFontChange('lowercase')">lowercase</button>
+                    </div>
+                <br/>
                 <div id="block_edits">
                     <label style="font-size: 20px"><u>Block Edits</u></label>
                     <div>
@@ -418,6 +481,25 @@
                             <option value="Teal">Teal</option>
                             <option value="Tomato">Tomato</option>
                             <option value="DodgerBlue">Blue</option>
+                        </select>
+                        &nbsp;&nbsp;&nbsp;
+                        <label>Alignment: </label>
+                        <select id="local_alignment">
+                            <option value="">No Change</option>
+                            <option value="left">Left</option>
+                            <option value="center">Center</option>
+                            <option value="right">Right</option>
+                        </select>
+                        &nbsp;&nbsp;&nbsp;
+                        <label>Heading Number: </label>
+                        <select id="local_priority">
+                            <option value="">No Change</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
                         </select>
                     </div>
                     <div id="submit">
