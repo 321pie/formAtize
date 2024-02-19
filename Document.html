@@ -286,9 +286,25 @@
         function handleFontChange(textStyle) {
             console.log("Reached beginning of function");
 
+            var selection = (document.all) ? document.selection.createRange().text : document.getSelection();
+            var selectionText = selection.toString();
+            
+            // How do I add a span around the selected text?
+            
+            var span = document.createElement('span');
+            span.textContent = selectionText;
+            span.style.textStyle = textStyle;
+            console.log(span.style.textStyle);
+            //span.innerHTML = `<span style="text-style: ${textStyle};">${selectionText}</span>`
+            console.log(textStyle);
+            
+            var range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(span);
+            
             
 
-            let selectedText = document.getSelection();
+            /*let selectedText = document.getSelection();
             let selectedRange = selectedText.getRangeAt(0);
             let block = selectedText.anchorNode.parentNode;
             let start = selectedText.anchorNode;
