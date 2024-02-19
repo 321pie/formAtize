@@ -399,7 +399,6 @@
                             blocks[blockIndex].SetPriority(document.getElementById('local_priority').value);
 
                         //Check for capitals
-                        console.log(document.getElementById('capitalize_block').checked);
                         if(document.getElementById('capitalize_block').checked)
                             blocks[blockIndex].SetText(blocks[blockIndex].GetText().toUpperCase());
                         else if(document.getElementById('lowercase_block').checked)
