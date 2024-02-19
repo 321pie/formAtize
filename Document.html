@@ -315,14 +315,31 @@
                         range2.setEndPoint('EndToStart', range); 
 
                         //Add span with specified text-style
+                        //Try .value instead of .innerText if errors
                         console.log("finding strings");
                         let currentPosition = range2.text.length;
-                        let strLeft = textarea.value.substring(0,currentPosition);
-                        let strMiddle = block.value.substring(block.selectionStart, block.selectionEnd);
-                        let strRight = textarea.value.substring(currentPosition, textarea.value.length);
-                        block.value = strLeft + `<span style="text-style: ${textStyle};">` + strMiddle + '</span>' + strRight;
+                        let strLeft = block.innerText.substring(0,currentPosition);
+                        let strMiddle = block.innerText.substring(block.selectionStart, block.selectionEnd);
+                        let strRight = block.innerText.substring(currentPosition, textarea.value.length);
+                        block.innerHTML = strLeft + `<span style="text-style: ${textStyle};">` + strMiddle + '</span>' + strRight;
 
                         console.log("Reached end of function");
+
+                        //Reload to make HTML appear
+                        /*pages = document.getElementsByClassName('page');
+                        for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+                            blocks = pages.item(pageIndex).getElementsByClassName('block');
+
+                            for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+                                let temp = document.createElement('div');
+                                //console.log(temp);
+                                
+                                temp.innerText = blocks[blockIndex].innerText;
+                                blocks[blockIndex].innerHTML = temp.innerText;
+                                console.log(temp.innerText);
+                                //blocks[blockIndex].innerHTML = '';
+                            }
+                        }*/
 
                         return true;
                     }
@@ -450,9 +467,9 @@
                 <div id="inline_edits">
                     <label style="font-size: 20px"><u>Inline Edits</u></label>
                     <div>
-                        <button onClick="handleFontChange('bold')"><b>Bold<b/></button>
-                        <button onClick="handleFontChange('italic')"><i>Italicize<i/></button>
-                        <button onClick="handleFontChange('underline')"><u>Underline<u/></button>
+                        <button onClick="handleFontChange('bold')"><b>Bold</b></button>
+                        <button onClick="handleFontChange('italic')"><i>Italicize</i></button>
+                        <button onClick="handleFontChange('underline')"><u>Underline</u></button>
                         <button onClick="handleCapsFontChange('capital')">CAPITALIZE</button>
                         <button onClick="handleCapsFontChange('lowercase')">lowercase</button>
                     </div>
