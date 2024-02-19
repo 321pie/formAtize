@@ -286,20 +286,107 @@
         function handleFontChange(textStyle) {
             console.log("Reached beginning of function");
 
-            if (input.selectionStart == input.selectionEnd) {
-                return; // nothing is selected
-            }
-
-            let selected = input.value.slice(input.selectionStart, input.selectionEnd);
-            input.setRangeText(`*${selected}*`);
+            
 
             let selectedText = document.getSelection();
             let selectedRange = selectedText.getRangeAt(0);
             let block = selectedText.anchorNode.parentNode;
+            let start = selectedText.anchorNode;
+            let end = selectedText.focusNode;
+
+            start.innerText = "Please work";
+
+            block.querySelectorAll('*').forEach((item) => {
+                console.log(item);
+
+                let startString;
+                let endString;
+                if(item === start) {
+                    //If in same node
+                    if(item === end) {
+                        //Find earliest offset
+                        if(selectedRange.startOffset < selectedRange.endOffset) {
+                            startString = start.innerText.slice(0, selectedRange.startOffset);
+                            let middleString = start.innerText.slice(selectedRange.startOffset, selectedRange.endOffset);
+                            endString = start.innerText.slice(selectedRange.endOffset);
+                        }
+                        else {
+                            startString = start.innerText.slice(0, selectedRange.endOffset);
+                            let middleString = start.innerText.slice(selectedRange.endOffset, selectedRange.startOffset);
+                            endString = start.innerText.slice(selectedRange.startOffset);
+                        }
+                        //Add text
+                        start.innerHTML = startString + `<span style="text-style: ${textStyle};">` + middleString + '</span>' + endString;
+                    }
+                    else {
+                        //Add beginning to first node
+                        startString = start.innerText.slice(0, selectedRange.startOffset);
+                        endString = start.innerText.slice(selectedRange.startOffset);
+                        start.innerText = startString + `<span style="text-style: ${textStyle};">` + endString;
+
+                        //Add ending to end node
+                        startString = end.innerText.slice(0, selectedRange.endOffset);
+                        endString = end.innerText.slice(selectedRange.endOffset);
+                        end.innerText = startString + '</span>' + endString;
+                    }
+                }
+                else if(item === end) {
+                    //If in same node
+                    if(item === start) {
+                        //Find earliest offset
+                        if(selectedRange.startOffset < selectedRange.endOffset) {
+                            startString = end.innerText.slice(0, selectedRange.startOffset);
+                            let middleString = end.innerText.slice(selectedRange.startOffset, selectedRange.endOffset);
+                            endString = end.innerText.slice(selectedRange.endOffset);
+                        }
+                        else {
+                            startString = end.innerText.slice(0, selectedRange.endOffset);
+                            let middleString = end.innerText.slice(selectedRange.endOffset, selectedRange.startOffset);
+                            endString = end.innerText.slice(selectedRange.startOffset);
+                        }
+                        //Add text
+                        end.innerHTML = startString + `<span style="text-style: ${textStyle};">` + middleString + '</span>' + endString;
+                    }
+                    else {
+                        //Add beginning to first node
+                        startString = end.innerText.slice(0, selectedRange.startOffset);
+                        endString = end.innerText.slice(selectedRange.startOffset);
+                        end.innerText = startString + `<span style="text-style: ${textStyle};">` + endString;
+
+                        //Add ending to end node
+                        startString = start.innerText.slice(0, selectedRange.endOffset);
+                        endString = start.innerText.slice(selectedRange.endOffset);
+                        start.innerText = startString + '</span>' + endString;
+                    }
+                }
+            });
 
             console.log(selectedText);
             console.log(selectedRange);
             console.log(block);
+            console.log(selectedRange.startOffset);
+            console.log(selectedRange.endOffset);
+
+            console.log("look below:");
+            console.log(block.innerText.slice(0, selectedText.focusOffset));
+            console.log(block.innerText.slice(0, selectedText.anchorOffset-String(selectedText).length));
+            console.log(block.innerText.slice(selectedText.extentOffset));
+            console.log(String(selectedText));
+            console.log(selectedText.focusOffset);
+            console.log(selectedText.anchorOffset);
+            console.log(selectedText.extentOffset);
+            console.log(block.innerText.slice(0, selectedText.baseOffset));
+            
+
+            //block.value = block.value.slice(0, selectedText.baseOffset) + value + block.value.slice(selectedText.extentOffset);
+
+            if (block.selectionStart == block.selectionEnd) {
+                console.log("Nothing selected?");
+                return; // nothing is selected
+            }
+
+            let selected = block.innerText.slice(block.selectionStart, block.selectionEnd);
+            block.setRangeText(`*${selected}*`);
 
             let range = block.createTextRange();
             let range2 = range.duplicate();
