@@ -285,8 +285,57 @@
 
         function handleFontChange(textStyle) {
             console.log("Reached beginning of function");
+
+            if (input.selectionStart == input.selectionEnd) {
+                return; // nothing is selected
+            }
+
+            let selected = input.value.slice(input.selectionStart, input.selectionEnd);
+            input.setRangeText(`*${selected}*`);
+
+            let selectedText = document.getSelection();
+            let selectedRange = selectedText.getRangeAt(0);
+            let block = selectedText.anchorNode.parentNode;
+
+            console.log(selectedText);
+            console.log(selectedRange);
+            console.log(block);
+
+            let range = block.createTextRange();
+            let range2 = range.duplicate();
+
+            range.moveToBookmark(selectedRange.getBookmark()); 
+            range2.setEndPoint('EndToStart', range); 
+
+            //Add span with specified text-style
+            //Try .value instead of .innerText if errors
+            console.log("finding strings");
+            let currentPosition = range2.text.length;
+            let strLeft = block.innerText.substring(0,currentPosition);
+            let strMiddle = block.innerText.substring(block.selectionStart, block.selectionEnd);
+            let strRight = block.innerText.substring(currentPosition, textarea.value.length);
+            block.innerHTML = strLeft + `<span style="text-style: ${textStyle};">` + strMiddle + '</span>' + strRight;
+
+            console.log("Reached end of function");
+
+            //Reload to make HTML appear
+            /*pages = document.getElementsByClassName('page');
+            for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+                blocks = pages.item(pageIndex).getElementsByClassName('block');
+
+                for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+                    let temp = document.createElement('div');
+                    //console.log(temp);
+                    
+                    temp.innerText = blocks[blockIndex].innerText;
+                    blocks[blockIndex].innerHTML = temp.innerText;
+                    console.log(temp.innerText);
+                    //blocks[blockIndex].innerHTML = '';
+                }*/
+
+            //if(selectedText.selectionDirection)
             //Get all textboxes
-            let pages = document.getElementsByClassName('page');
+            /*let pages = document.getElementsByClassName('page');
             let blocks;
             let block;
             for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
@@ -297,7 +346,12 @@
 
                     //Check if mouse is in box
                     console.log("Found block");
+                    console.log(block);
+                    block.focus();
                     console.log(block.selection);
+                    console.log(document.getSelection());
+                    console.log(document.getSelection().anchorNode.parentNode);
+                    console.log(block.selectionStart);
                     if (document.selection) { 
                         console.log("In selection");
                         block.focus(); 
@@ -339,12 +393,12 @@
                                 console.log(temp.innerText);
                                 //blocks[blockIndex].innerHTML = '';
                             }
-                        }*/
+                        }
 
                         return true;
                     }
                 }
-            }
+            }*/
 
             return false;
         }
