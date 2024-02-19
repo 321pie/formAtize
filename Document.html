@@ -373,6 +373,8 @@
         }
 
         function handleSubmitBlockEditClick(globally=true) {
+            handleSaveDocumentClick(false);
+
             let HTMLBlocks = [];
             if(globally == false) {
                 let temp = document.getElementById("block_display").getElementsByClassName("blocks");
@@ -417,7 +419,8 @@
                 }
             }
 
-            handleSaveAndLoadDocument();
+            loadText(false);
+            
         }
 
         function handleCleanClick() {
