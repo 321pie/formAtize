@@ -289,14 +289,54 @@
             let selectionText = selection.toString();
             
             //Add a span around the selected text
-            
             let span = document.createElement('span');
-            span.textContent = selectionText;
-            if(fontStyle === 'italic' || fontStyle === 'bold') {
-                span.style.fontStyle = fontStyle;
+
+            if(fontStyle === '') {
+                //Check for capitals
+                if(document.getElementById('capitalize').checked) {
+                    span.textContent = selectionText.toUpperCase();
+                }
+                else if(document.getElementById('lowercase').checked) {
+                    span.textContent = selectionText.toLowerCase();
+                }
+                else {
+                    span.textContent = selectionText
+                }
+                
+                //Check for styles
+                if(document.getElementById('italicize').checked) {
+                    span.style.fontStyle = 'italic';
+                }
+                if(document.getElementById('bold').checked) {
+                    span.style.fontWeight = 'bold';
+                }
+                if(document.getElementById('underline').checked) {
+                    span.style.textDecorationLine = 'underline';
+                }
             }
+
             else {
-                span.style.textDecorationLine = fontStyle;
+                //Check for capitals
+                if(fontStyle === 'capitalize') {
+                    span.textContent = selectionText.toUpperCase();
+                }
+                else if(fontStyle === 'lowercase') {
+                    span.textContent = selectionText.toLowerCase();
+                }
+                else {
+                    span.textContent = selectionText
+                }
+                
+                //Check for styles
+                if(fontStyle === 'italic') {
+                    span.style.fontStyle = fontStyle;
+                }
+                else if(fontStyle === 'bold') {
+                    span.style.fontWeight = fontStyle;
+                }
+                else {
+                    span.style.textDecorationLine = fontStyle;
+                }
             }
             
             let range = selection.getRangeAt(0);
@@ -357,6 +397,23 @@
                             blocks[blockIndex].SetAlignment(document.getElementById('local_alignment').value);
                         if(document.getElementById('local_priority').value != "")
                             blocks[blockIndex].SetPriority(document.getElementById('local_priority').value);
+
+                        //Check for capitals
+                        console.log(document.getElementById('capitalize_block').checked);
+                        if(document.getElementById('capitalize_block').checked)
+                            blocks[blockIndex].SetText(blocks[blockIndex].GetText().toUpperCase());
+                        else if(document.getElementById('lowercase_block').checked)
+                            blocks[blockIndex].SetText(blocks[blockIndex].GetText().toLowerCase());
+                        
+                        //Check for styles
+                        if(document.getElementById('italicize_block').checked)
+                            blocks[blockIndex].SetText("<i>" + blocks[blockIndex].GetText() + "</i>");
+                        if(document.getElementById('bold_block').checked)
+                            blocks[blockIndex].SetText("<b>" + blocks[blockIndex].GetText() + "</b>");
+                        if(document.getElementById('underline_block').checked)
+                            blocks[blockIndex].SetText("<u>" + blocks[blockIndex].GetText() + "</u>");
+
+                        console.log(blocks[blockIndex].GetText());
                     }
                 }
             }
@@ -422,11 +479,17 @@
                 <div id="inline_edits">
                     <label style="font-size: 20px"><u>Inline Edits</u></label>
                     <div>
+                        <input id="bold" class="inline_font_edits" type="checkbox" value="bold">Bold</input>
+                        <input id="italicize" class="inline_font_edits" type="checkbox" value="italicize">Italicize</input>
+                        <input id="underline" class="inline_font_edits" type="checkbox" value="underline">Underline</input>
+                        <input id="capitalize" class="inline_font_edits" type="checkbox" value="capitalize">CAPITALIZE</input>
+                        <input id="lowercase" class="inline_font_edits" type="checkbox" value="lowercase">lowercase</input>
+                        <button onClick="handleFontChange('')">Submit</button><br/><br/>
                         <button onClick="handleFontChange('bold')"><b>Bold</b></button>
                         <button onClick="handleFontChange('italic')"><i>Italicize</i></button>
                         <button onClick="handleFontChange('underline')"><u>Underline</u></button>
-                        <button onClick="handleCapsFontChange('capital')">CAPITALIZE</button>
-                        <button onClick="handleCapsFontChange('lowercase')">lowercase</button>
+                        <button onClick="handleFontChange('capital')">CAPITALIZE</button>
+                        <button onClick="handleFontChange('lowercase')">lowercase</button>
                     </div>
                 <br/>
                 <div id="block_edits">
@@ -473,6 +536,14 @@
                             <option value="5">5</option>
                             <option value="6">6</option>
                         </select>
+                        <div>
+                            <input id="bold_block" class="inline_font_edits" type="checkbox" value="bold">Bold</input>
+                            <input id="italicize_block" class="inline_font_edits" type="checkbox" value="italicize">Italicize</input>
+                            <input id="underline_block" class="inline_font_edits" type="checkbox" value="underline">Underline</input>
+                            <input id="capitalize_block" class="inline_font_edits" type="checkbox" value="capitalize">CAPITALIZE</input>
+                            <input id="lowercase_block" class="inline_font_edits" type="checkbox" value="lowercase">lowercase</input>
+                            <br/><br/>
+                        </div>
                     </div>
                     <div id="submit">
                         <button onClick="handleSubmitBlockEditClick(false)">Submit</button>
