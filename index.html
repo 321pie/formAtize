@@ -14,6 +14,10 @@
         <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
       </div>
 
+      <div>
+        <button id="offline_button" onClick="handleOfflineClick()">Go Offline</button>
+      </div>
+
       <!--Add a button to create a document-->
       <div>
         <button id="create_document_button" onclick="handleCreateDocumentClick()">New Document</button>
@@ -51,6 +55,7 @@
 
         return id;
       }
+
       async function getFolderId() {
         let name = 'formAtize';
         let response;
@@ -186,6 +191,21 @@
           document.getElementById('authorize_button').innerText = 'Authorize';
           document.getElementById('signout_button').style.visibility = 'hidden';
         }
+      }
+
+      function handleOfflineClick() {
+        //Get saved files
+
+        
+        /*bakedGoods.set({
+          data: [{key: "key1", value: "val1"}, {key: "key2", value: "val2"}],
+          storageTypes: ["indexedDB", "webSQL"],
+
+          //Will be polyfilled with defaults for equivalent database structures
+          optionsObj: {conductDisjointly: false},
+
+          complete: function(byStorageTypeStoredKeysObj, byStorageTypeErrorObj){}
+        });*/
       }
 
       /**

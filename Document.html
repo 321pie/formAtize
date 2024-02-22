@@ -135,7 +135,20 @@
             }
 
             if(save) {
-                //Send Document class
+                //Save to local
+                console.log("About to save locally.");
+                bakedGoods.set({
+                    data: [DOCUMENT.ToJSON()],
+                    storageTypes: ["indexedDB", "webSQL"],
+
+                    //Will be polyfilled with defaults for equivalent database structures
+                    optionsObj: {conductDisjointly: false},
+
+                    complete: function(byStorageTypeStoredKeysObj, byStorageTypeErrorObj){}
+                });
+                console.log("Local save complete.");
+
+                //Save to remote
                 const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
                 fetch(url, {
                     'method': 'PATCH',
