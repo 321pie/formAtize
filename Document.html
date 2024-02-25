@@ -47,7 +47,11 @@
         }
 
         //Load document text
-        async function loadText(getRemote=true) {
+        async function loadText(getRemote=true, getLocal=false) {
+            if(getLocal) {
+                DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
+            }
+
             if(getRemote) {
                 let fileId = JSON.parse(FILE_ID);
 
@@ -81,7 +85,17 @@
 
         //Load document
         document.getElementById('document_name').innerText = DOCUMENT.GetName();
-        loadText(true); //Must be async
+
+        //Check for local or remote
+        console.log(FILE_ID)
+        if(FILE_ID == 'null') {
+            console.log("In local loadText");
+            loadText(false, true); //Must be async
+        }
+        else {
+            loadText(true); //Must be async
+        }
+        
 
         /*
         *Return to the home page
@@ -138,6 +152,12 @@
                 //Save to local
                 console.log("About to save locally.");
                 bakedGoods.set({
+                    data: [{key: `${DOCUMENT.GetName()}`, value: DOCUMENT.ToJSON(), dataFormat: "text/plain"}],
+                    storageTypes: ["fileSystem"],
+                    options: {fileSystem:{storageType: Window.PERSISTENT}},
+                    complete: function(byStorageTypeStoredItemRangeDataObj, byStorageTypeErrorObj){}
+                });
+                /*bakedGoods.set({
                     data: [DOCUMENT.ToJSON()],
                     storageTypes: ["indexedDB", "webSQL"],
 
@@ -145,7 +165,7 @@
                     optionsObj: {conductDisjointly: false},
 
                     complete: function(byStorageTypeStoredKeysObj, byStorageTypeErrorObj){}
-                });
+                });*/
                 console.log("Local save complete.");
 
                 //Save to remote

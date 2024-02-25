@@ -195,8 +195,42 @@
 
       function handleOfflineClick() {
         //Get saved files
+        console.log("Handling offline click");
+        bakedGoods.getAll({
+          storageTypes: ["fileSystem"],
+          options: {fileSystem:{storageType: Window.PERSISTENT}},
+          complete: function(resultDataObj, byStorageTypeErrorObj){
+            console.log("Get completed.");
 
-        
+            files = JSON.parse(JSON.stringify(resultDataObj)).fileSystem
+            if (!files || files.length == 0) {
+              document.getElementById('content').innerText = 'No files found.';
+              return;
+            }
+
+            /*console.log(JSON.stringify(files));
+            console.log(JSON.parse(JSON.stringify(files)).fileSystem[0]);
+            /*console.log(Array.from(files));
+            console.log(files[0]);
+            console.log(typeof(files[0]));
+            console.log(typeof(files[0].key));*/
+
+            // Make buttons for every file
+            for(const file in files) {
+              console.log(files[file]);
+              document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick('${files[file].key}', '${null}')">${files[file].key}</button>\n<br></br>`;
+            };
+          }
+        });
+        /*bakedGoods.get({
+          data: ["Try Me"],
+          storageTypes: ["fileSystem"],
+          options: {fileSystem:{storageType: Window.PERSISTENT}},
+          complete: function(resultDataObj, byStorageTypeErrorObj){
+            console.log("Get completed.");
+            console.log(resultDataObj);
+          }
+        });*/
         /*bakedGoods.set({
           data: [{key: "key1", value: "val1"}, {key: "key2", value: "val2"}],
           storageTypes: ["indexedDB", "webSQL"],
