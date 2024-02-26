@@ -49,7 +49,25 @@
         //Load document text
         async function loadText(getRemote=true, getLocal=false) {
             if(getLocal) {
-                DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
+                let file;
+
+                bakedGoods.get({
+                    data: [DOCUMENT.GetName()],
+                    storageTypes: ["fileSystem"],
+                    options: {fileSystem:{storageType: Window.PERSISTENT}},
+                    complete: function(resultDataObj, byStorageTypeErrorObj){
+                        console.log("Get completed.");
+                        file = resultDataObj;
+                        console.log(file);
+                    }
+                }).then(function() {
+                    console.log(file);
+                    //file = JSON.parse(JSON.stringify(file))
+
+                    for(key in file) {
+                        DOCUMENT.FromJSON(JSON.parse(JSON.stringify(file[key])));
+                    }
+                });
             }
 
             if(getRemote) {
@@ -87,14 +105,17 @@
         document.getElementById('document_name').innerText = DOCUMENT.GetName();
 
         //Check for local or remote
-        console.log(FILE_ID)
-        if(FILE_ID == 'null') {
+        console.log(FILE_ID);
+        console.log(typeof(FILE_ID));
+        console.log(FILE_ID == null);
+        console.log(FILE_ID.localeCompare("null"));
+        //if(FILE_ID.localeCompare("null") == 0) {
             console.log("In local loadText");
             loadText(false, true); //Must be async
-        }
+        /*}
         else {
             loadText(true); //Must be async
-        }
+        }*/
         
 
         /*
@@ -152,7 +173,7 @@
                 //Save to local
                 console.log("About to save locally.");
                 bakedGoods.set({
-                    data: [{key: `${DOCUMENT.GetName()}`, value: DOCUMENT.ToJSON(), dataFormat: "text/plain"}],
+                    data: [{key: DOCUMENT.GetName(), value: DOCUMENT.ToJSON(), dataFormat: "text/plain"}],
                     storageTypes: ["fileSystem"],
                     options: {fileSystem:{storageType: Window.PERSISTENT}},
                     complete: function(byStorageTypeStoredItemRangeDataObj, byStorageTypeErrorObj){}
