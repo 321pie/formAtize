@@ -35,7 +35,19 @@
         //Retrieve data from local storage and clear for future documents
         const FILE_ID = localStorage.getItem("fileId");
         let DOCUMENT = new Doc(localStorage.getItem("fileName"));
+        let FILE = null;
+        const LOCAL = (FILE_ID === '""');
         localStorage.clear();
+
+        //Get FILE from local
+        bakedGoods.get({
+            data: [DOCUMENT.GetName()],
+            storageTypes: ["fileSystem"],
+            options: {fileSystem:{storageType: Window.PERSISTENT}},
+            complete: function(resultDataObj, byStorageTypeErrorObj){
+                FILE = resultDataObj;
+            }
+        })
 
         //Hide selected menu
         document.getElementById("selected_menu").innerHTML = '';
@@ -47,40 +59,27 @@
         }
 
         //Load document text
-        async function loadText(getRemote=true, getLocal=false) {
-            if(getLocal) {
-                let file;
-
-                bakedGoods.get({
-                    data: [DOCUMENT.GetName()],
-                    storageTypes: ["fileSystem"],
-                    options: {fileSystem:{storageType: Window.PERSISTENT}},
-                    complete: function(resultDataObj, byStorageTypeErrorObj){
-                        console.log("Get completed.");
-                        file = resultDataObj;
-                        console.log(file);
-                    }
-                }).then(function() {
-                    console.log(file);
-                    //file = JSON.parse(JSON.stringify(file))
-
-                    for(key in file) {
-                        DOCUMENT.FromJSON(JSON.parse(JSON.stringify(file[key])));
-                    }
-                });
-            }
-
+        async function loadText(getRemote=true) {
             if(getRemote) {
-                let fileId = JSON.parse(FILE_ID);
+                if(LOCAL) {
+                    //Just one key
+                    for(key in FILE) {
+                        DOCUMENT.FromJSON(JSON.parse(FILE[key]));
+                    }
+                }
+                else {
+                    let fileId = JSON.parse(FILE_ID);
 
-                let res = await gapi.client.drive.files.get({
-                'fileId': fileId,
-                'alt': 'media',
-                }, {
-                'responseType': 'arraybuffer',
-                });
+                    let res = await gapi.client.drive.files.get({
+                    'fileId': fileId,
+                    'alt': 'media',
+                    }, {
+                    'responseType': 'arraybuffer',
+                    });
 
-                DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
+                    DOCUMENT.FromJSON(JSON.parse(JSON.stringify(res)).result);
+                }
+                
             }
 
             //Clear section
@@ -103,20 +102,11 @@
 
         //Load document
         document.getElementById('document_name').innerText = DOCUMENT.GetName();
-
-        //Check for local or remote
-        console.log(FILE_ID);
-        console.log(typeof(FILE_ID));
-        console.log(FILE_ID == null);
-        console.log(FILE_ID.localeCompare("null"));
-        //if(FILE_ID.localeCompare("null") == 0) {
-            console.log("In local loadText");
-            loadText(false, true); //Must be async
-        /*}
-        else {
-            loadText(true); //Must be async
-        }*/
         
+        //Wait for get to finish before loading
+        setTimeout(function() {
+            loadText(true); //Must be async
+        }, 500);
 
         /*
         *Return to the home page
@@ -170,35 +160,35 @@
             }
 
             if(save) {
-                //Save to local
-                console.log("About to save locally.");
-                bakedGoods.set({
-                    data: [{key: DOCUMENT.GetName(), value: DOCUMENT.ToJSON(), dataFormat: "text/plain"}],
-                    storageTypes: ["fileSystem"],
-                    options: {fileSystem:{storageType: Window.PERSISTENT}},
-                    complete: function(byStorageTypeStoredItemRangeDataObj, byStorageTypeErrorObj){}
-                });
-                /*bakedGoods.set({
-                    data: [DOCUMENT.ToJSON()],
-                    storageTypes: ["indexedDB", "webSQL"],
+                if(LOCAL) {
+                    //Save to local
+                    bakedGoods.set({
+                        data: [{key: DOCUMENT.GetName(), value: DOCUMENT.ToJSON(), dataFormat: "text/plain"}],
+                        storageTypes: ["fileSystem"],
+                        options: {fileSystem:{storageType: Window.PERSISTENT}},
+                        complete: function(byStorageTypeStoredItemRangeDataObj, byStorageTypeErrorObj){alert('File saved locally.\nSync to remote from home menu.')}
+                    });
+                }
+                else {
+                    //Save to local
+                    bakedGoods.set({
+                        data: [{key: DOCUMENT.GetName(), value: DOCUMENT.ToJSON(), dataFormat: "text/plain"}],
+                        storageTypes: ["fileSystem"],
+                        options: {fileSystem:{storageType: Window.PERSISTENT}},
+                        complete: function(byStorageTypeStoredItemRangeDataObj, byStorageTypeErrorObj){}
+                    });
 
-                    //Will be polyfilled with defaults for equivalent database structures
-                    optionsObj: {conductDisjointly: false},
-
-                    complete: function(byStorageTypeStoredKeysObj, byStorageTypeErrorObj){}
-                });*/
-                console.log("Local save complete.");
-
-                //Save to remote
-                const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
-                fetch(url, {
-                    'method': 'PATCH',
-                    'headers': new Headers({
-                        'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
-                        'Content-type': 'text/plain'
-                    }),
-                    'body': `${DOCUMENT.ToJSON()}`
-                }).then(alert('File saved.'));
+                    //Save to remote
+                    const url = 'https://www.googleapis.com/upload/drive/v3/files/' + JSON.parse(FILE_ID) + '?uploadType=media';
+                    fetch(url, {
+                        'method': 'PATCH',
+                        'headers': new Headers({
+                            'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
+                            'Content-type': 'text/plain'
+                        }),
+                        'body': `${DOCUMENT.ToJSON()}`
+                    }).then(alert('File saved.'));
+                }
             }
         }
 

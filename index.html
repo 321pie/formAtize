@@ -16,16 +16,22 @@
 
       <div>
         <button id="offline_button" onClick="handleOfflineClick()">Go Offline</button>
+        <br/>
+        <button id="sync_button" onClick="handleDataSync()">Sync Offline Data</button>
       </div>
 
       <!--Add a button to create a document-->
       <div>
         <button id="create_document_button" onclick="handleCreateDocumentClick()">New Document</button>
+        <br/>
+        <button id="create_offline_document_button" onclick="handleCreateOfflineDocumentClick()">New Document</button>
       </div>
 
       <!--Add a button to refresh the available documents-->
       <div>
         <button id="refresh_button" onclick="listFiles()">Refresh Files</button>
+        <br/>
+        <button id="offline_refresh_button" onclick="handleOfflineClick()">Refresh Files</button>
       </div>
 
       <!--Holds buttons that link to files-->
@@ -106,6 +112,9 @@
       document.getElementById('signout_button').style.visibility = 'hidden';
       document.getElementById('create_document_button').style.visibility = 'hidden';
       document.getElementById('refresh_button').style.visibility = 'hidden';
+      document.getElementById('sync_button').style.visibility = 'hidden';
+      document.getElementById('create_offline_document_button').style.visibility = 'hidden';
+      document.getElementById('offline_refresh_button').style.visibility = 'hidden';
 
       /**
        * Callback after api.js is loaded.
@@ -161,8 +170,10 @@
           document.getElementById('authorize_button').innerText = 'Change User';
 
           // Launching point for program
+          document.getElementById('offline_button').style.visibility = 'hidden';
           document.getElementById('create_document_button').style.visibility = 'visible';
           document.getElementById('refresh_button').style.visibility = 'visible';
+          document.getElementById('sync_button').style.visibility = 'visible';
 
           getFolderId().then(function(id){
             FOLDER_ID = id;
@@ -194,13 +205,14 @@
       }
 
       function handleOfflineClick() {
+        //Remove old files
+        document.getElementById('file_list').innerHTML = '';
+
         //Get saved files
-        console.log("Handling offline click");
         bakedGoods.getAll({
           storageTypes: ["fileSystem"],
           options: {fileSystem:{storageType: Window.PERSISTENT}},
           complete: function(resultDataObj, byStorageTypeErrorObj){
-            console.log("Get completed.");
 
             files = JSON.parse(JSON.stringify(resultDataObj)).fileSystem
             if (!files || files.length == 0) {
@@ -208,38 +220,17 @@
               return;
             }
 
-            /*console.log(JSON.stringify(files));
-            console.log(JSON.parse(JSON.stringify(files)).fileSystem[0]);
-            /*console.log(Array.from(files));
-            console.log(files[0]);
-            console.log(typeof(files[0]));
-            console.log(typeof(files[0].key));*/
-
+            let fileName;
             // Make buttons for every file
             for(const file in files) {
-              console.log(files[file]);
-              document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick('${files[file].key}', '${null}')">${files[file].key}</button>\n<br></br>`;
+              fileName = JSON.parse(files[file].value).m_name;
+              document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick('${fileName}', '')">${fileName}</button>\n<br></br>`;
             };
           }
         });
-        /*bakedGoods.get({
-          data: ["Try Me"],
-          storageTypes: ["fileSystem"],
-          options: {fileSystem:{storageType: Window.PERSISTENT}},
-          complete: function(resultDataObj, byStorageTypeErrorObj){
-            console.log("Get completed.");
-            console.log(resultDataObj);
-          }
-        });*/
-        /*bakedGoods.set({
-          data: [{key: "key1", value: "val1"}, {key: "key2", value: "val2"}],
-          storageTypes: ["indexedDB", "webSQL"],
 
-          //Will be polyfilled with defaults for equivalent database structures
-          optionsObj: {conductDisjointly: false},
-
-          complete: function(byStorageTypeStoredKeysObj, byStorageTypeErrorObj){}
-        });*/
+        document.getElementById('create_offline_document_button').style.visibility = 'visible';
+        document.getElementById('offline_refresh_button').style.visibility = 'visible';
       }
 
       /**
@@ -252,8 +243,8 @@
         //TODO: Check for duplicate document name
 
         //Create document with data from popup window
-        var fileContent = `${fileText}`;
-        var file = new Blob([new Doc(fileName).ToJSON()], {type: 'text/plain'});
+        var doc = new Doc(fileName).AddPage(0, new Page().AddBlock(0, fileText));
+        var file = new Blob([doc.ToJSON()], {type: 'text/plain'});
         var metadata = {
             'name': `${fileName}`,
             'mimeType': 'text/plain',
@@ -275,6 +266,95 @@
         xhr.send(form);
 
         return fileId;
+      }
+
+      /*
+      * Creates a document in offline mode
+      * Duplicate names overwrite
+      */
+      function handleCreateOfflineDocumentClick(fileText = '') {
+        let doc = new Doc(prompt("Document name", "Title"));
+        doc.AddPage(0, new Page().AddBlock(0, new Block(fileText)));
+
+        bakedGoods.set({
+            data: [{key: doc.GetName(), value: doc.ToJSON(), dataFormat: "text/plain"}],
+            storageTypes: ["fileSystem"],
+            options: {fileSystem:{storageType: Window.PERSISTENT}},
+            complete: function(byStorageTypeStoredItemRangeDataObj, byStorageTypeErrorObj){alert('File created locally.')}
+        });
+      }
+
+      function handleDataSync() {
+        //Get json data from local database
+        bakedGoods.getAll({
+          storageTypes: ["fileSystem"],
+          options: {fileSystem:{storageType: Window.PERSISTENT}},
+          complete: function(resultDataObj, byStorageTypeErrorObj){
+
+            files = JSON.parse(JSON.stringify(resultDataObj)).fileSystem
+            if (!files || files.length == 0) {
+              //No files to sync
+              alert("Synced all 0 files.");
+              return;
+            }
+
+            //Save local json data to remote json data
+            let doc = new Doc()
+            let fileId = 0;
+            for(const file in files) {
+              doc.FromJSON(JSON.parse(files[file].value));
+
+              //Check for name to get file id
+              let buttons = document.getElementById('file_list').children;
+              for(let buttonIndex=0; buttonIndex < buttons.length; buttonIndex++) {
+                if(buttons[buttonIndex].innerText === doc.GetName()) {
+                  fileId = buttons[buttonIndex].getAttribute("data-arg1");
+                  break;
+                }
+              }
+
+              if(fileId === 0) {
+                //Create new doc
+                var fileContent = `${doc.ToJSON()}`;
+                var blobFile = new Blob([doc.ToJSON()], {type: 'text/plain'});
+                var metadata = {
+                    'name': `${doc.GetName()}`,
+                    'mimeType': 'text/plain',
+                    'parents': [FOLDER_ID], // Folder ID in Google Drive
+                };
+
+                var accessToken = gapi.auth.getToken().access_token; // Use gapi to retrieve the access token
+                var form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+                form.append('file', blobFile);
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('post', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id');
+                xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+                xhr.responseType = 'json';
+                xhr.onload = () => {
+                    fileId = xhr.response.id; // Retrieve uploaded file ID.
+                };
+                xhr.send(form);
+              }
+              else {
+                //Save doc data to existing remote
+                const url = 'https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media';
+                fetch(url, {
+                    'method': 'PATCH',
+                    'headers': new Headers({
+                        'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
+                        'Content-type': 'text/plain'
+                    }),
+                    'body': `${doc.ToJSON()}`
+                });
+              }
+
+              //Reset fileId
+              fileId = 0;
+            };
+          }
+        });
       }
 
       /**
@@ -310,7 +390,7 @@
         }
         // Make buttons for every file
         for(const file in files) {
-          document.getElementById('file_list').innerHTML += `<button onclick="handleLoadDocumentClick('${files[file].name}', '${files[file].id}')">${files[file].name}</button>\n<br></br>`
+          document.getElementById('file_list').innerHTML += `<button data-arg1="${files[file].id}" onclick="handleLoadDocumentClick('${files[file].name}', '${files[file].id}')">${files[file].name}</button>\n<br></br>`
         };
       }
     </script>
