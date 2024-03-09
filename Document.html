@@ -89,12 +89,39 @@
             let pages = DOCUMENT.GetPages();
             let blocks;
             let HTMLText = '';
+            let headerText = '';
+            let header_footer;
             for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
                 HTMLText = '';
+
+                //Add header
+                header_footer = pages[pageIndex].GetHeader();
+                if(header_footer != null) {
+                    headerText += header_footer.GetText();
+                    if(pages[pageIndex].GetShowPageNumbers()) {
+                        headerText += `\t${pageIndex + 1}`;
+                    }
+                    HTMLText += `<div style="font-family: ${header_footer.GetFont()}; font-size: ${header_footer.GetFontSize()}px; color: ${header_footer.GetFontColor()}; text-align: center;">${headerText}</div>`;
+                    headerText = '';
+                }
+                else if(pages[pageIndex].GetShowPageNumbers()) {
+                    HTMLText += `<div style="text-align: center;">${pageIndex + 1}</div>`;
+                }
+
+                //Add blocks to page
                 blocks = pages[pageIndex].GetBlocks();
                 for(blockIndex=0; blockIndex < blocks.length; blockIndex++) {
                     HTMLText += loadBlock(blocks[blockIndex]);
                 }
+
+                //Add footer
+                header_footer = pages[pageIndex].GetFooter();
+                if(header_footer != null) {
+                    header_footer.GetText();
+                    HTMLText += `<div style="font-family: ${header_footer.GetFont()}; font-size: ${header_footer.GetFontSize()}px; color: ${header_footer.GetFontColor()}; text-align: center;">${header_footer.GetText()}</div>`;
+                }
+
+                //Load page to document
                 HTMLText = '<div class="page">' + HTMLText + '</div>';
                 document.getElementById('pages').innerHTML += HTMLText;
             }
@@ -195,7 +222,7 @@
         function handleAddBlockTemplateClick() {
             //Save new block to DOCUMENT
             //TODO: Check for unique names somewhere
-            DOCUMENT.AddBlock(new Block('', document.getElementById("block_type").value, document.getElementById("block_priority").value, document.getElementById("block_alignment").value));
+            DOCUMENT.AddBlock(new Block(document.getElementById("block_text").value, document.getElementById("block_type").value, document.getElementById("block_priority").value, document.getElementById("block_alignment").value));
 
             //Reset and call handleBlockMenuClick()
             document.getElementById("selected_menu").innerHTML = '';
@@ -208,6 +235,10 @@
             <div>
                 <label>Please enter a block name: </label>
                 <textarea id="block_type" style="height: 10px; width: 60px; resize: none;"></textarea>
+            </div>
+            <div>
+                <label>Please enter text for the block: </label>
+                <textarea id="block_text" style="height: 10px; width: 60px; resize: none;"></textarea>
             </div>
             <div>
                 <label>Please select a heading number for the block: </label>
@@ -414,6 +445,31 @@
             }
 
             handleSaveAndLoadDocument();
+        }
+
+        function handleCreatePageClick() {
+            //Populate menu to create new block
+            document.getElementById("selected_menu").innerHTML = `
+            <div>
+                <label>Please enter text for the header: </label>
+                <textarea id="header_text" style="height: 10px; width: 60px; resize: none;"></textarea>
+            </div>
+            <div>
+                <label>Please enter text for the footer: </label>
+                <textarea id="footer_text" style="height: 10px; width: 60px; resize: none;"></textarea>
+            </div>
+            <div>
+                <input id="show_page_numbers" type="checkbox">Show Page Numbers</input>
+            </div>
+            <div id="submit"><button id="submit_button" onclick="handleAddPageClick()">Submit</button></div>`;
+        }
+
+        function handleAddPageClick() {
+            DOCUMENT.AddPage(DOCUMENT.GetPageCount(), new Page(document.getElementById("show_page_numbers").checked, document.getElementById("header_text").value, document.getElementById("footer_text").value));
+
+            //Reset and call handleBlockMenuClick()
+            document.getElementById("selected_menu").innerHTML = '';
+            handleBlockMenuClick();
         }
 
         function handleSubmitBlockEditClick(globally=true) {
@@ -630,6 +686,7 @@
 
                 menu.innerHTML = `
                 <div class="grid-container">
+                    <div class="grid-item"><button id="create_page" onclick="handleCreatePageClick()">Create New Page</button></div>
                     <div class="grid-item"><button id="create_block_template" onclick="handleCreateBlockTemplateClick()">Create New Block Template</button></div>`;
 
                 let blocks = DOCUMENT.GetBlocks();

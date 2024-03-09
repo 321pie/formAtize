@@ -3,20 +3,16 @@ class Block {
     #m_type = "default";
     #m_priority = 3;
     #m_alignment = "left";
-    #m_header = false;
-    #m_footer = false;
     #m_text = '';
     #m_font = "arial";
     #m_fontColor = "black";
     #m_fontSize = 12;
 
-    constructor(text='', type='default', priority=3, alignment='left', header=false, footer=false, font='arial', fontColor='black', fontSize=12) {
+    constructor(text='', type='default', priority=3, alignment='left', font='arial', fontColor='black', fontSize=12) {
         this.#m_type = type;
         this.#m_priority = priority;
         this.#m_alignment = alignment;
         this.#m_text = text;
-        this.#m_header = header;
-        this.#m_footer = footer;
         this.#m_font = font;
         this.#m_fontColor = fontColor;
         this.#m_fontSize = fontSize;
@@ -36,24 +32,6 @@ class Block {
 
     GetText() {
         return this.#m_text;
-    }
-
-    GetHeader() {
-        return this.#m_header;
-    }
-
-    SetHeader(header) {
-        this.#m_isDirty = true;
-        this.#m_header = header;
-    }
-
-    GetFooter() {
-        return this.#m_footer;
-    }
-
-    SetFooter(footer) {
-        this.#m_isDirty = true;
-        this.#m_footer = footer;
     }
 
     GetFont() {
@@ -135,8 +113,6 @@ class Block {
             m_priority: this.#m_priority,
             m_alignment: this.#m_alignment,
             m_text: this.#m_text,
-            m_header: this.#m_header,
-            m_footer: this.#m_footer,
             m_font: this.#m_font,
             m_fontColor: this.#m_fontColor,
             m_fontSize: this.#m_fontSize
@@ -149,8 +125,6 @@ class Block {
         this.#m_priority = json.m_priority;
         this.#m_alignment = json.m_alignment;
         this.#m_text = json.m_text;
-        this.#m_header = json.m_header;
-        this.#m_footer = json.m_footer;
         this.#m_font = json.m_font;
         this.#m_fontColor = json.m_fontColor;
         this.#m_fontSize = json.m_fontSize;
@@ -160,8 +134,15 @@ class Block {
 class Page {
     #m_blocks = [];
     #m_isDirty = true;
+    #m_header = null;
+    #m_footer = null;
+    #m_showPageNumbers = false
 
-    constructor() {}
+    constructor(showPageNumbers, header, footer) {
+        this.#m_showPageNumbers = showPageNumbers;
+        this.#m_header = header;
+        this.#m_footer = footer;
+    }
 
     GetBlockCount() {
         return this.#m_blocks.length;
@@ -207,6 +188,33 @@ class Page {
         return isEmpty;
     }
 
+    GetShowPageNumbers() {
+        return this.#m_showPageNumbers;
+    }
+
+    SetShowPageNumbers(showPageNumbers) {
+        this.#m_isDirty = true;
+        this.#m_showPageNumbers = showPageNumbers;
+    }
+
+    GetHeader() {
+        return this.#m_header;
+    }
+
+    SetHeader(header) {
+        this.#m_isDirty = true;
+        this.#m_header = header;
+    }
+
+    GetFooter() {
+        return this.#m_footer;
+    }
+
+    SetFooter(footer) {
+        this.#m_isDirty = true;
+        this.#m_footer = footer;
+    }
+
     IsDirty() {
         return this.#m_isDirty
     }
@@ -225,6 +233,9 @@ class Page {
 
         return {
             m_blocks: myBlocks,
+            m_header: this.#m_header,
+            m_footer: this.#m_footer,
+            m_showPageNumbers: this.#m_showPageNumbers,
             m_isDirty: this.#m_isDirty
         }
     }
@@ -242,6 +253,9 @@ class Page {
 
         this.#m_blocks = myBlocks;
         this.#m_isDirty = json.m_isDirty;
+        this.#m_header = json.m_header;
+        this.#m_footer = json.m_footer;
+        this.#m_showPageNumbers = json.m_showPageNumbers;
     }
 }
 
