@@ -158,13 +158,13 @@
         */
         function handleSaveDocumentClick(save=true) {
             //Load text into Doc class
-            let pages = DOCUMENT.GetPages();
+            let docPages = DOCUMENT.GetPages();
             let docBlocks = [];
             let blocks;
             let block;
 
-            for(let pageIndex=0; pageIndex < pages.length; pageIndex++) {
-                blocks = pages[pageIndex].GetBlocks();
+            for(let pageIndex=0; pageIndex < docPages.length; pageIndex++) {
+                blocks = docPages[pageIndex].GetBlocks();
                 for(let blockIndex=0; blockIndex < blocks.length; blockIndex++) {
                     docBlocks.push(blocks[blockIndex]);
                 }
@@ -174,7 +174,7 @@
             pages = document.getElementsByClassName('page');
             let docBlockIndex = 0;
             for(let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-                let curPage = new Page();
+                let curPage = new Page(docPages[pageIndex].GetShowPageNumbers(), docPages[pageIndex].GetHeader(), docPages[pageIndex].GetFooter());
                 blocks = pages.item(pageIndex).getElementsByClassName('block');
 
                 for(let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
@@ -280,6 +280,9 @@
 
             pages[pages.length - 1].innerHTML += HTMLText; //Load block into end of last page
             DOCUMENT.AddBlockToPage(block);
+
+            //Refresh to ensure header before and footer after
+            handleSaveAndLoadDocument();
         }
 
         function handleSaveAndLoadDocument() {
@@ -465,7 +468,23 @@
         }
 
         function handleAddPageClick() {
-            DOCUMENT.AddPage(DOCUMENT.GetPageCount(), new Page(document.getElementById("show_page_numbers").checked, document.getElementById("header_text").value, document.getElementById("footer_text").value));
+            let header = null;
+            if(document.getElementById("header_text").value != '') {
+                header = new Block(document.getElementById("header_text").value);
+            }
+
+            let footer = null;
+            if(document.getElementById("footer_text").value != '') {
+                footer = new Block(document.getElementById("footer_text").value);
+            }
+
+            //Save document as is then create new page
+            handleSaveDocumentClick(false);
+
+            DOCUMENT.AddPage(DOCUMENT.GetPageCount(), new Page(document.getElementById("show_page_numbers").checked, header, footer));
+
+            //Load expanded document
+            loadText(false);
 
             //Reset and call handleBlockMenuClick()
             document.getElementById("selected_menu").innerHTML = '';

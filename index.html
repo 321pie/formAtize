@@ -171,6 +171,8 @@
 
           // Launching point for program
           document.getElementById('offline_button').style.visibility = 'hidden';
+          document.getElementById('create_offline_document_button').style.visibility = 'hidden';
+          document.getElementById('offline_refresh_button').style.visibility = 'hidden';
           document.getElementById('create_document_button').style.visibility = 'visible';
           document.getElementById('refresh_button').style.visibility = 'visible';
           document.getElementById('sync_button').style.visibility = 'visible';
@@ -198,9 +200,13 @@
         if (token !== null) {
           google.accounts.oauth2.revoke(token.access_token);
           gapi.client.setToken('');
-          document.getElementById('content').innerText = '';
+          document.getElementById('file_list').innerText = '';
           document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('offline_button').style.visibility = 'visible';
           document.getElementById('signout_button').style.visibility = 'hidden';
+          document.getElementById('sync_button').style.visibility = 'hidden';
+          document.getElementById('create_document_button').style.visibility = 'hidden';
+          document.getElementById('refresh_button').style.visibility = 'hidden';
         }
       }
 
@@ -216,7 +222,7 @@
 
             files = JSON.parse(JSON.stringify(resultDataObj)).fileSystem
             if (!files || files.length == 0) {
-              document.getElementById('content').innerText = 'No files found.';
+              document.getElementById('file_list').innerText = 'No files found.';
               return;
             }
 
@@ -236,27 +242,28 @@
       /**
        * Create a document
        */
-      function handleCreateDocumentClick(fileText = '') {
+      function handleCreateDocumentClick() {
         let fileId = -1;
         let fileName = prompt("Document name", "Title");
 
         //TODO: Check for duplicate document name
 
         //Create document with data from popup window
-        var doc = new Doc(fileName).AddPage(0, new Page().AddBlock(0, fileText));
-        var file = new Blob([doc.ToJSON()], {type: 'text/plain'});
-        var metadata = {
+        let doc = new Doc(fileName);
+
+        let file = new Blob([doc.ToJSON()], {type: 'text/plain'});
+        let metadata = {
             'name': `${fileName}`,
             'mimeType': 'text/plain',
             'parents': [FOLDER_ID], // Folder ID in Google Drive
         };
 
-        var accessToken = gapi.auth.getToken().access_token; // Use gapi to retrieve the access token
-        var form = new FormData();
+        let accessToken = gapi.auth.getToken().access_token; // Use gapi to retrieve the access token
+        let form = new FormData();
         form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
         form.append('file', file);
 
-        var xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest();
         xhr.open('post', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id');
         xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
         xhr.responseType = 'json';
@@ -302,7 +309,13 @@
             let doc = new Doc()
             let fileId = 0;
             for(const file in files) {
-              doc.FromJSON(JSON.parse(files[file].value));
+              try {
+                doc.FromJSON(JSON.parse(files[file].value));
+              }
+              catch (error) {
+                //console.log("Encountered empty file during data sync.");
+                doc = new Doc(files[file].key.substring(1));
+              }
 
               //Check for name to get file id
               let buttons = document.getElementById('file_list').children;
@@ -380,12 +393,12 @@
             'q': `'${FOLDER_ID}' in parents`, // Folder ID in Google Drive
           });
         } catch (err) {
-          document.getElementById('content').innerText = err.message;
+          document.getElementById('file_list').innerText = err.message;
           return;
         }
         const files = response.result.files;
         if (!files || files.length == 0) {
-          document.getElementById('content').innerText = 'No files found.';
+          document.getElementById('file_list').innerText = 'No files found.';
           return;
         }
         // Make buttons for every file

@@ -138,7 +138,7 @@ class Page {
     #m_footer = null;
     #m_showPageNumbers = false
 
-    constructor(showPageNumbers, header, footer) {
+    constructor(showPageNumbers=false, header=null, footer=null) {
         this.#m_showPageNumbers = showPageNumbers;
         this.#m_header = header;
         this.#m_footer = footer;
@@ -435,7 +435,7 @@ class Doc {
         this.#m_description = description;
     }
 
-    ToJSON(){
+    ToJSON() {
         let myPages = {};
         let page;
         for (let pageIndex = 0; pageIndex < this.#m_pages.length; pageIndex++){
