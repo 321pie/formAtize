@@ -1,7 +1,19 @@
-const ronin     = require( 'ronin-server' )
-const mocks     = require( 'ronin-mocks' )
- 
-const server = ronin.server()
- 
-server.use( '/', mocks.server( server.Router(), false, true ) )
-server.start()
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+  // Read the contents of index.html
+  const htmlPath = path.join(__dirname, 'index.html');
+  const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+
+  // Send the HTML content as the response
+  res.send(htmlContent);
+});
+
+app.listen(port, () => {
+  console.log(`Server is listening on port ${port}`);
+});

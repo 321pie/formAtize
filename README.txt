@@ -3,7 +3,8 @@ npm install http-server
 
 
 Command:
-npx http-server -p 8000
+npx http-server -p 3000
 
-,
-  "type": "module"
+
+Website:
+http://localhost:3000
