@@ -10,5 +10,5 @@ Website:
 http://localhost:8000
 
 Docker Setup:
-docker build formAtize
-docker run -it -p 8000:8000 formatize .
+docker build -t formatize .
+docker run -d -p 8000:8000 formatize
