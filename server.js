@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = 8000;
 
 app.get('/', (req, res) => {
   // Read the contents of index.html
