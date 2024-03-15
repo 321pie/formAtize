@@ -231,10 +231,19 @@ class Page {
             myBlocks["block"+blockIndex] = block;
         }
 
+        let header = null;
+        let footer = null;
+        if(this.#m_header != null) {
+            header = this.#m_header.ToJSON();
+        }
+        if(this.#m_footer != null) {
+            footer = this.#m_footer.ToJSON();
+        }
+
         return {
             m_blocks: myBlocks,
-            m_header: this.#m_header,
-            m_footer: this.#m_footer,
+            m_header: header,
+            m_footer: footer,
             m_showPageNumbers: this.#m_showPageNumbers,
             m_isDirty: this.#m_isDirty
         }
@@ -257,7 +266,7 @@ class Page {
 
         if(json.m_header != null) {
             this.#m_header = new Block();
-            this.#m_header = this.#m_header.FromJSON(json.m_header);
+            this.#m_header.FromJSON(json.m_header);
         }
         else {
             this.#m_header = json.m_header;
@@ -265,7 +274,7 @@ class Page {
         
         if(json.m_footer != null) {
             this.#m_footer = new Block();
-            this.#m_footer = this.#m_footer.FromJSON(json.m_footer);
+            this.#m_footer.FromJSON(json.m_footer);
         }
         else {
             this.#m_footer = json.m_footer;
