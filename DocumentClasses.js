@@ -253,9 +253,23 @@ class Page {
 
         this.#m_blocks = myBlocks;
         this.#m_isDirty = json.m_isDirty;
-        this.#m_header = json.m_header;
-        this.#m_footer = json.m_footer;
         this.#m_showPageNumbers = json.m_showPageNumbers;
+
+        if(json.m_header != null) {
+            this.#m_header = new Block();
+            this.#m_header = this.#m_header.FromJSON(json.m_header);
+        }
+        else {
+            this.#m_header = json.m_header;
+        }
+        
+        if(json.m_footer != null) {
+            this.#m_footer = new Block();
+            this.#m_footer = this.#m_footer.FromJSON(json.m_footer);
+        }
+        else {
+            this.#m_footer = json.m_footer;
+        }
     }
 }
 
