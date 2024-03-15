@@ -6,6 +6,7 @@
   "license": "Idk",
   "main": "server.js",
   "dependencies": {
+    "express": "^4.18.3",
     "http-server": "^14.1.1"
   }
 }
