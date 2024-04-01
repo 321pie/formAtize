@@ -5,6 +5,7 @@ const path = require('path');
 const app = express();
 const port = 8000;
 
+// Fix Docker path drama
 app.use(express.static(__dirname + '/public' ));
 
 app.get('/', (req, res) => {
