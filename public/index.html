@@ -377,6 +377,7 @@
         localStorage.setItem('fileName', `${fileName}`);
         localStorage.setItem('fileId', JSON.stringify(fileId, 4, null));
 
+        //app.use(express.static(__dirname + '/public' ));
         //Change to document page
         $("#body").load("./Document.html");
       }
