@@ -482,11 +482,6 @@
             //Save document as is then create new page
             handleSaveDocumentClick(false);
 
-            //TODO: Delete
-            console.log("Printing");
-            console.log(header);
-            console.log(footer);
-
             DOCUMENT.AddPage(DOCUMENT.GetPageCount(), new Page(document.getElementById("show_page_numbers").checked, header, footer));
 
             console.log(DOCUMENT.GetPages()[0].GetHeader());
